@@ -117,8 +117,15 @@ it's a choice, really not, but really not that I don't have the skills to do bet
 
 Try Specs Plus By Nat 649 : https://github.com/nat649/SpecsPlus
 
-## Stargazers over time
-[![Stargazers over time](https://starchart.cc/qcom-toolbox/Specs.svg?variant=adaptive)](https://starchart.cc/qcom-toolbox/Specs)
+## Star History
+
+<a href="https://www.star-history.com/?repos=qcom-toolbox%2FSpecs&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=qcom-toolbox/Specs&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=qcom-toolbox/Specs&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=qcom-toolbox/Specs&type=date&legend=top-left" />
+ </picture>
+</a>
 
 ## Assets
 
