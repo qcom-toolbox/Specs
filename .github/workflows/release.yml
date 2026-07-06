@@ -69,12 +69,16 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Install WiX
-        run: choco install wix311 -y --no-progress
+      - name: Install WiX Toolset
+        run: choco install wixtoolset -y --no-progress
 
       - name: Add WiX to PATH
-        run: echo "C:\Program Files (x86)\WiX Toolset v3.11\bin" >> $env:GITHUB_PATH
         shell: pwsh
+        run: |
+          $wixBin = (Get-ChildItem "C:\Program Files (x86)\WiX Toolset v3.*\bin" | Select-Object -First 1).FullName
+          if (-not $wixBin) { throw "WiX Toolset not found after Chocolatey install" }
+          "Found WiX at $wixBin"
+          echo "$wixBin" >> $env:GITHUB_PATH
 
       - name: Download JAR
         uses: actions/download-artifact@v4
