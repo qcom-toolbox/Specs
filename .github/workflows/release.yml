@@ -6,6 +6,12 @@ on:
       - 'v*'
       - 'V*'
       - '[0-9]*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (ex: 2.0)'
+        required: true
+        default: '2.0'
 
 permissions:
   contents: write
@@ -35,8 +41,12 @@ jobs:
       - name: Resolve version
         id: version
         run: |
-          TAG="${GITHUB_REF_NAME}"
-          VERSION=$(echo "$TAG" | sed -E 's/^[vV-]+//')
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+            VERSION=$(echo "$TAG" | sed -E 's/^[vV-]+//')
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build fat JAR
@@ -229,6 +239,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', needs.build-jar.outputs.version) || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           name: Specs ${{ needs.build-jar.outputs.version }}
           draft: false
           generate_release_notes: true
