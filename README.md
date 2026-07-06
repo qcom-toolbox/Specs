@@ -11,6 +11,8 @@
 
 ---
 
+Specs Developpement will come back soon.
+
 # Specs :
 
 ### A Java application that displays detailed information about your PC's hardware.
