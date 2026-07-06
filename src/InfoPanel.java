@@ -74,6 +74,7 @@ public class InfoPanel {
         if (osVersion.contains("12")) return "/icon/Mac OS 12 128x128.png";
         if (osVersion.contains("11")) return "/icon/Mac OS 11 128x128.png";
         if (osVersion.contains("26")) return "/icon/Mac OS 26 128x128.png";
+        if (osVersion.contains("27")) return "/icon/Mac OS 27 128x128.png";
         return "/icon/Apple Mac OS 128x128.png";
     }
 
