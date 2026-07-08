@@ -1,46 +1,62 @@
 //Refresh.java
 
 import javax.swing.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Refresh {
+
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
     private static ScheduledExecutorService autoRefreshExecutor;
     private static int refreshInterval = 5; // Default interval (seconds)
 
     // Start the auto-refresh
-    public static void startAutoRefresh(JPanel mainPanel) {
+    public static void startAutoRefresh(CardSet cards) {
         stopAutoRefresh(); // Ensure any previous executor is stopped
         autoRefreshExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        autoRefreshExecutor.scheduleAtFixedRate(() -> refreshSpecs(mainPanel), 0, refreshInterval, TimeUnit.SECONDS);
+        autoRefreshExecutor.scheduleAtFixedRate(() -> refreshSpecs(cards), 0, refreshInterval, TimeUnit.SECONDS);
     }
 
-    private static void refreshSpecs(JPanel mainPanel) {
-        if (mainPanel.getComponentCount() >= 4) {
-            try {
-                // Mise à jour des informations dans chaque panneau
-                GUI.updateTextArea((JPanel) mainPanel.getComponent(0), "Operating System :" + " " + Specs.getOperatingSystemName() + "\n" + "Version :" + " " + Specs.getOperatingSystemVersion(), GUI.osIcon);
-                GUI.updateTextArea((JPanel) mainPanel.getComponent(1), "CPU :" + " " + Specs.getCpuName() + "\n" + "Cores :" + " " + Specs.getCpuCores() + "\n" + "Threads :" + " " + Specs.getCpuThreads(), GUI.cpuIcon);
-                long vram = Long.parseLong(Specs.getGpuVram()); JPanel gpuPanel = InfoPanel.createInfoPanel("GPU", "GPU :" + " " + Specs.getGpuName() + "\nVram :" + " " + (vram == 0L ? "Shared" : vram + " " + "MB"), GUI.gpuIcon);
-                GUI.updateTextArea((JPanel) mainPanel.getComponent(3), "RAM (Total) :" + " " + Specs.getRamSize() + " " + "MB" + "\n" + "RAM (Used) :" + " " + Specs.getRamUsed() + " " + "MB" + "\n" + "RAM (Free) :" + " " + Specs.getRamFree() + " " + "MB", GUI.ramIcon);
+    private static void refreshSpecs(CardSet cards) {
+        try {
+            SwingUtilities.invokeLater(() -> {
+                cards.osCard.setInfo("Operating System : " + Specs.getOperatingSystemName()
+                        + "\nVersion : " + Specs.getOperatingSystemVersion());
 
-                // Demander au garbage collector de libérer la mémoire non utilisée après la mise à jour
+                cards.cpuCard.setInfo("CPU : " + Specs.getCpuName()
+                        + "\nCores : " + Specs.getCpuCores()
+                        + "\nThreads : " + Specs.getCpuThreads());
+
+                long vram = Long.parseLong(Specs.getGpuVram());
+                cards.gpuCard.setInfo("GPU : " + Specs.getGpuName()
+                        + "\nVram : " + (vram <= 0L ? "Shared" : vram + " MB"));
+
+                long total = Specs.getRamSize();
+                long used = Specs.getRamUsed();
+                long free = Specs.getRamFree();
+                cards.ramCard.setInfo("RAM (Total) : " + total + " MB"
+                        + "\nRAM (Used) : " + used + " MB"
+                        + "\nRAM (Free) : " + free + " MB");
+                int percent = total > 0 ? (int) Math.round((used * 100.0) / total) : 0;
+                cards.ramCard.setProgress(percent, percent + "% used");
+
+                cards.statusLabel.setText("Last updated: " + LocalTime.now().format(TIME_FMT));
+
+                // Ask the garbage collector to release unused memory after the update
                 System.gc();
-            } catch (ClassCastException e) {
-                System.err.println("Error casting component in mainPanel: " + e.getMessage());
-            } catch (Exception e) {
-                System.err.println("Unexpected error while updating system specs: " + e.getMessage());
-            }
-        } else {
-            System.err.println("Insufficient components in mainPanel. Expected 4, found: " + mainPanel.getComponentCount());
+            });
+        } catch (Exception e) {
+            System.err.println("Unexpected error while updating system specs: " + e.getMessage());
         }
     }
 
-
     // Display Auto Refresh dialog
-    public static void showAutoRefreshDialog(JFrame parent, JPanel mainPanel) {
+    public static void showAutoRefreshDialog(JFrame parent, CardSet cards) {
         String[] options = {"1 second", "5 seconds", "10 seconds", "15 seconds", "60 seconds", "Custom", "Disabled"};
         String selected = (String) JOptionPane.showInputDialog(
                 parent,
@@ -54,25 +70,25 @@ public class Refresh {
 
         if (selected != null) {
             switch (selected) {
-                case "1 second" -> setAutoRefresh(1, mainPanel);
-                case "5 seconds" -> setAutoRefresh(5, mainPanel);
-                case "10 seconds" -> setAutoRefresh(10, mainPanel);
-                case "15 seconds" -> setAutoRefresh(15, mainPanel);
-                case "60 seconds" -> setAutoRefresh(60, mainPanel);
-                case "Custom" -> handleCustomInterval(parent, mainPanel);
+                case "1 second" -> setAutoRefresh(1, cards);
+                case "5 seconds" -> setAutoRefresh(5, cards);
+                case "10 seconds" -> setAutoRefresh(10, cards);
+                case "15 seconds" -> setAutoRefresh(15, cards);
+                case "60 seconds" -> setAutoRefresh(60, cards);
+                case "Custom" -> handleCustomInterval(parent, cards);
                 case "Disabled" -> stopAutoRefresh();
             }
         }
     }
 
     // Handle custom interval
-    private static void handleCustomInterval(JFrame parent, JPanel mainPanel) {
+    private static void handleCustomInterval(JFrame parent, CardSet cards) {
         String input = JOptionPane.showInputDialog(parent, "Enter custom interval in seconds (only numbers):");
         if (input != null) {
             try {
                 int customInterval = Integer.parseInt(input);
                 if (customInterval > 0) {
-                    setAutoRefresh(customInterval, mainPanel);
+                    setAutoRefresh(customInterval, cards);
                 } else {
                     JOptionPane.showMessageDialog(parent, "Enter a positive number.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -84,10 +100,10 @@ public class Refresh {
     }
 
     // Set auto-refresh interval
-    private static void setAutoRefresh(int interval, JPanel mainPanel) {
+    private static void setAutoRefresh(int interval, CardSet cards) {
         if (interval > 0) {
             refreshInterval = interval;
-            startAutoRefresh(mainPanel);
+            startAutoRefresh(cards);
         } else {
             stopAutoRefresh();
         }

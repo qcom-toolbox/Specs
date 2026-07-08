@@ -41,6 +41,19 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/miglayout-swing.jar</systemPath>
         </dependency>
+
+        <!-- FlatLaf: modern flat Look and Feel for the redesigned UI -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.7.1</version>
+        </dependency>
+        <!-- Extra IntelliJ-derived themes so users can pick a color scheme they like -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf-intellij-themes</artifactId>
+            <version>3.7.1</version>
+        </dependency>
     </dependencies>
 
     <build>

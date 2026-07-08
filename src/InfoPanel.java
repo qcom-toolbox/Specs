@@ -178,27 +178,4 @@ public class InfoPanel {
         return loadIcon(iconPath);
     }
 
-    // Method to create an information panel with transparent background
-    public static JPanel createInfoPanel(String title, String info, ImageIcon icon) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBorder(BorderFactory.createTitledBorder(title));
-
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-
-        // Use JTextPane for transparency
-        JTextPane textPane = new JTextPane();
-        textPane.setText(info);
-        textPane.setEditable(false);
-        textPane.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        textPane.setBackground(new Color(0, 0, 0, 0));
-        textPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        textPane.setFocusable(false);
-        textPane.setOpaque(false);
-
-        panel.add(iconLabel);
-        panel.add(textPane);
-
-        return panel;
-    }
 }
