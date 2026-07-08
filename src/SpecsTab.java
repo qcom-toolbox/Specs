@@ -60,6 +60,7 @@ public final class SpecsTab {
                         String hyperThreading = Specs.supportsHyperThreading() ? "Yes" : "No";
                         
                         return "CPU :" + " " + Specs.getCpuName() + "\n"
+                                + "Architecture :" + " " + Specs.getCpuArch() + "\n"
                                 + "Cores :" + " " + Specs.getCpuCores() + "\n"
                                 + "Threads :" + " " + Specs.getCpuThreads() + "\n"
                                 + "Base Clock :" + " " + baseClockStr + "\n"

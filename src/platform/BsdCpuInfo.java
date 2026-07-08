@@ -130,4 +130,39 @@ public class BsdCpuInfo {
             return false;
         }
     }
+
+    public static String getCpuArch() {
+        String osArch = System.getProperty("os.arch");
+        if (osArch != null) {
+            return normalizeArch(osArch);
+        }
+        
+        // Fallback to OSHI
+        try {
+            SystemInfo systemInfo = new SystemInfo();
+            CentralProcessor processor = systemInfo.getHardware().getProcessor();
+            String arch = processor.getProcessorIdentifier().getMicroarchitecture();
+            if (arch != null && !arch.isEmpty()) {
+                return normalizeArch(arch);
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
+    }
+
+    private static String normalizeArch(String arch) {
+        String lowerArch = arch.toLowerCase();
+        if (lowerArch.contains("aarch64") || lowerArch.contains("arm64")) {
+            return "arm64";
+        } else if (lowerArch.contains("arm")) {
+            return "arm";
+        } else if (lowerArch.contains("x86_64") || lowerArch.contains("x64") || lowerArch.contains("amd64")) {
+            return "x64";
+        } else if (lowerArch.contains("x86") || lowerArch.contains("i386") || lowerArch.contains("i686")) {
+            return "x86";
+        }
+        return arch;
+    }
 }

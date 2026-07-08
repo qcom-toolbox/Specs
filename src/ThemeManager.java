@@ -89,25 +89,25 @@ public final class ThemeManager {
     }
 
     private static final Palette LIGHT_PALETTE = new Palette(
-            new Color(245, 245, 247),
+            new Color(249, 250, 252),
             new Color(255, 255, 255),
-            new Color(28, 28, 30),
-            new Color(99, 99, 102),
-            new Color(210, 210, 215),
+            new Color(15, 23, 42),
+            new Color(100, 116, 139),
+            new Color(226, 232, 240),
             new Color(255, 255, 255),
-            new Color(235, 235, 240),
-            new Color(0, 122, 255)
+            new Color(241, 245, 249),
+            new Color(59, 130, 246)
     );
 
     private static final Palette DARK_PALETTE = new Palette(
-            new Color(22, 22, 24),
-            new Color(38, 38, 42),
-            new Color(242, 242, 247),
-            new Color(174, 174, 178),
-            new Color(58, 58, 62),
-            new Color(48, 48, 54),
-            new Color(32, 32, 36),
-            new Color(10, 132, 255)
+            new Color(15, 23, 42),
+            new Color(30, 41, 59),
+            new Color(248, 250, 252),
+            new Color(148, 163, 184),
+            new Color(51, 65, 85),
+            new Color(30, 41, 59),
+            new Color(15, 23, 42),
+            new Color(96, 165, 250)
     );
 
     private static final Path PREFERENCES_PATH = Path.of(
@@ -135,6 +135,14 @@ public final class ThemeManager {
 
     public static Palette getPalette() {
         return currentPalette;
+    }
+
+    public static Color blendColors(Color c1, Color c2, double ratio) {
+        int r = (int) (c1.getRed() * (1 - ratio) + c2.getRed() * ratio);
+        int g = (int) (c1.getGreen() * (1 - ratio) + c2.getGreen() * ratio);
+        int b = (int) (c1.getBlue() * (1 - ratio) + c2.getBlue() * ratio);
+        int a = (int) (c1.getAlpha() * (1 - ratio) + c2.getAlpha() * ratio);
+        return new Color(r, g, b, a);
     }
 
     public static ViewMode getViewMode() {
@@ -375,6 +383,14 @@ public final class ThemeManager {
         UIManager.put("TabbedPane.borderHightlightColor", palette.border);
         UIManager.put("TabbedPane.darkShadow", palette.border);
         UIManager.put("TabbedPane.shadow", palette.border);
+
+        // Modern scrollbar styling
+        UIManager.put("ScrollBar.width", 10);
+        UIManager.put("ScrollBar.thumb", dark ? new Color(80, 80, 85) : new Color(180, 180, 185));
+        UIManager.put("ScrollBar.thumbDarkShadow", dark ? new Color(60, 60, 65) : new Color(160, 160, 165));
+        UIManager.put("ScrollBar.thumbShadow", dark ? new Color(70, 70, 75) : new Color(170, 170, 175));
+        UIManager.put("ScrollBar.track", palette.windowBackground);
+        UIManager.put("ScrollBar.trackHighlight", palette.tabBackground);
 
         if (dark) {
             UIManager.put("nimbusBase", palette.panelBackground);

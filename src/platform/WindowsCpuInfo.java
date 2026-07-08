@@ -71,4 +71,36 @@ public class WindowsCpuInfo {
 
         return processor.getLogicalProcessorCount() > processor.getPhysicalProcessorCount();
     }
+
+    public static String getCpuArch() {
+        String osArch = System.getProperty("os.arch");
+        if (osArch != null) {
+            return normalizeArch(osArch);
+        }
+        
+        // Fallback to OSHI
+        SystemInfo systemInfo = new SystemInfo();
+        HardwareAbstractionLayer hal = systemInfo.getHardware();
+        CentralProcessor processor = hal.getProcessor();
+        String arch = processor.getProcessorIdentifier().getMicroarchitecture();
+        if (arch != null && !arch.isEmpty()) {
+            return normalizeArch(arch);
+        }
+        
+        return "Unknown";
+    }
+
+    private static String normalizeArch(String arch) {
+        String lowerArch = arch.toLowerCase();
+        if (lowerArch.contains("aarch64") || lowerArch.contains("arm64")) {
+            return "arm64";
+        } else if (lowerArch.contains("arm")) {
+            return "arm";
+        } else if (lowerArch.contains("x86_64") || lowerArch.contains("x64") || lowerArch.contains("amd64")) {
+            return "x64";
+        } else if (lowerArch.contains("x86") || lowerArch.contains("i386") || lowerArch.contains("i686")) {
+            return "x86";
+        }
+        return arch;
+    }
 }

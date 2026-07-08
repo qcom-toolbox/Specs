@@ -233,21 +233,41 @@ public class InfoPanel {
     }
 
     public static JPanel createModernInfoPanel(String title, String info, ImageIcon icon) {
-        JPanel panel = new JPanel(new BorderLayout(16, 12));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel mainPanel = new JPanel(new BorderLayout(0, 0));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        mainPanel.setOpaque(false);
 
-        JPanel headerPanel = new JPanel(new BorderLayout(8, 0));
+        JPanel cardPanel = new JPanel(new BorderLayout(16, 16));
+        cardPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createEmptyBorder(20, 24, 20, 24),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+        cardPanel.setBackground(ThemeManager.getPalette().panelBackground);
+        cardPanel.setOpaque(true);
+
+        // Add subtle shadow effect using compound border
+        cardPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createEmptyBorder(2, 2, 2, 2),
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0, 0, 0, 20), 1, true),
+                BorderFactory.createEmptyBorder(20, 24, 20, 24)
+            )
+        ));
+
+        JPanel headerPanel = new JPanel(new BorderLayout(12, 0));
         headerPanel.setOpaque(false);
         
-        ImageIcon scaledIcon = scaleIcon(icon, 48);
+        ImageIcon scaledIcon = scaleIcon(icon, 56);
         JLabel iconLabel = new JLabel(scaledIcon);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
         
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16f));
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 18f));
+        titleLabel.setForeground(ThemeManager.getPalette().textPrimary);
         
         headerPanel.add(iconLabel, BorderLayout.WEST);
         headerPanel.add(titleLabel, BorderLayout.CENTER);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
 
         JTextPane textPane = createModernTextPane(info);
         JScrollPane scrollPane = new JScrollPane(textPane);
@@ -257,14 +277,16 @@ public class InfoPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JPanel content = new JPanel(new BorderLayout(0, 12));
+        JPanel content = new JPanel(new BorderLayout(0, 0));
         content.setOpaque(false);
         content.add(headerPanel, BorderLayout.NORTH);
         content.add(scrollPane, BorderLayout.CENTER);
 
-        panel.add(content, BorderLayout.CENTER);
-        ThemeManager.applyToComponentTree(panel);
-        return panel;
+        cardPanel.add(content, BorderLayout.CENTER);
+        mainPanel.add(cardPanel, BorderLayout.CENTER);
+        
+        ThemeManager.applyToComponentTree(mainPanel);
+        return mainPanel;
     }
 
     private static JTextPane createModernTextPane(String info) {
@@ -272,11 +294,11 @@ public class InfoPanel {
         textPane.setText(info);
         textPane.setEditable(false);
         Font systemFont = getModernFont();
-        textPane.setFont(systemFont.deriveFont(Font.PLAIN, 14f));
-        textPane.setBackground(ThemeManager.getPalette().panelBackground);
-        textPane.setBorder(null);
+        textPane.setFont(systemFont.deriveFont(Font.PLAIN, 13f));
+        textPane.setBackground(new Color(0, 0, 0, 0));
+        textPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         textPane.setFocusable(false);
-        textPane.setOpaque(true);
+        textPane.setOpaque(false);
         textPane.setForeground(ThemeManager.getPalette().textPrimary);
         return textPane;
     }

@@ -55,6 +55,22 @@ public class Specs {
         return cpuName;
     }
 
+    public static String getCpuArch() {
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        if (osName.contains("mac")) {
+            return MacCpuInfo.getCpuArch();
+        } else if (osName.contains("linux")) {
+            return LinuxCpuInfo.getCpuArch();
+        } else if (osName.contains("win")) {
+            return WindowsCpuInfo.getCpuArch();
+        } else if (osName.contains("bsd")) {
+            return BsdCpuInfo.getCpuArch();
+        } else {
+            return "Unknown";
+        }
+    }
+
     public static int getCpuCores() {
         String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
         try {
