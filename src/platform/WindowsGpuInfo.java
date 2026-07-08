@@ -3,6 +3,9 @@ package platform;
 import oshi.SystemInfo;
 import oshi.hardware.GraphicsCard;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WindowsGpuInfo {
 
     private static final String[] BLACKLIST = {
@@ -53,5 +56,46 @@ public class WindowsGpuInfo {
         }
 
         return (long) Math.ceil(vram / (1024.0 * 1024.0));
+    }
+
+    public static List<GpuInfo> getAllGpus() {
+        SystemInfo si = new SystemInfo();
+        List<GpuInfo> gpus = new ArrayList<>();
+
+        for (GraphicsCard gpu : si.getHardware().getGraphicsCards()) {
+            String name = gpu.getName();
+            if (!isBlacklisted(name)) {
+                long vram = (long) Math.ceil(gpu.getVRam() / (1024.0 * 1024.0));
+                gpus.add(new GpuInfo(name, vram));
+            }
+        }
+
+        // si aucun GPU "valide", prendre tous
+        if (gpus.isEmpty()) {
+            for (GraphicsCard gpu : si.getHardware().getGraphicsCards()) {
+                long vram = (long) Math.ceil(gpu.getVRam() / (1024.0 * 1024.0));
+                gpus.add(new GpuInfo(gpu.getName(), vram));
+            }
+        }
+
+        return gpus;
+    }
+
+    public static class GpuInfo {
+        private final String name;
+        private final long vram;
+
+        public GpuInfo(String name, long vram) {
+            this.name = name;
+            this.vram = vram;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getVram() {
+            return vram;
+        }
     }
 }

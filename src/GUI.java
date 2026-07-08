@@ -119,7 +119,7 @@ public class GUI {
 
         for (SpecsTab tab : SpecsTab.getTabs()) {
             String headerTitle = getHeaderTitle(tab.getId());
-            JPanel infoPanel = InfoPanel.createInfoPanel(headerTitle, tab.getContent(), tab.getIcon());
+            JPanel infoPanel = InfoPanel.createModernInfoPanel(headerTitle, tab.getContent(), tab.getIcon());
             SpecsTab.bindPanel(tab.getId(), infoPanel);
             pane.addTab(tab.getTitle(), scaleIcon(tab.getIcon(), 24), infoPanel, tab.getTitle() + " specifications");
         }

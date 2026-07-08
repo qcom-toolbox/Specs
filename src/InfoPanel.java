@@ -179,27 +179,23 @@ public class InfoPanel {
     }
 
     public static JPanel createInfoPanel(String title, String info, ImageIcon icon) {
-        JPanel panel = new JPanel(new BorderLayout(16, 12));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel panel = new JPanel(new BorderLayout(24, 16));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(24, 24, 24, 24),
+                BorderFactory.createTitledBorder(title)
+        ));
 
-        JPanel headerPanel = new JPanel(new BorderLayout(8, 0));
-        headerPanel.setOpaque(false);
-        
-        ImageIcon scaledIcon = scaleIcon(icon, 48);
+        ImageIcon scaledIcon = scaleIcon(icon, 64);
         JLabel iconLabel = new JLabel(scaledIcon);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
-        
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16f));
-        
-        headerPanel.add(iconLabel, BorderLayout.WEST);
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 16));
+        iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        iconLabel.setVerticalAlignment(SwingConstants.TOP);
 
         JTextPane textPane = createInfoTextPane(info);
 
-        JPanel content = new JPanel(new BorderLayout(0, 12));
+        JPanel content = new JPanel(new BorderLayout());
         content.setOpaque(false);
-        content.add(headerPanel, BorderLayout.NORTH);
+        content.add(iconLabel, BorderLayout.WEST);
         content.add(textPane, BorderLayout.CENTER);
 
         panel.add(content, BorderLayout.CENTER);
@@ -228,12 +224,60 @@ public class InfoPanel {
         JTextPane textPane = new JTextPane();
         textPane.setText(info);
         textPane.setEditable(false);
-        Font systemFont = getModernFont();
-        textPane.setFont(systemFont.deriveFont(Font.PLAIN, 14f));
+        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 15));
         textPane.setBackground(new Color(0, 0, 0, 0));
-        textPane.setBorder(BorderFactory.createEmptyBorder(12, 0, 0, 0));
+        textPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         textPane.setFocusable(false);
         textPane.setOpaque(false);
+        return textPane;
+    }
+
+    public static JPanel createModernInfoPanel(String title, String info, ImageIcon icon) {
+        JPanel panel = new JPanel(new BorderLayout(16, 12));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JPanel headerPanel = new JPanel(new BorderLayout(8, 0));
+        headerPanel.setOpaque(false);
+        
+        ImageIcon scaledIcon = scaleIcon(icon, 48);
+        JLabel iconLabel = new JLabel(scaledIcon);
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16f));
+        
+        headerPanel.add(iconLabel, BorderLayout.WEST);
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+
+        JTextPane textPane = createModernTextPane(info);
+        JScrollPane scrollPane = new JScrollPane(textPane);
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        JPanel content = new JPanel(new BorderLayout(0, 12));
+        content.setOpaque(false);
+        content.add(headerPanel, BorderLayout.NORTH);
+        content.add(scrollPane, BorderLayout.CENTER);
+
+        panel.add(content, BorderLayout.CENTER);
+        ThemeManager.applyToComponentTree(panel);
+        return panel;
+    }
+
+    private static JTextPane createModernTextPane(String info) {
+        JTextPane textPane = new JTextPane();
+        textPane.setText(info);
+        textPane.setEditable(false);
+        Font systemFont = getModernFont();
+        textPane.setFont(systemFont.deriveFont(Font.PLAIN, 14f));
+        textPane.setBackground(ThemeManager.getPalette().panelBackground);
+        textPane.setBorder(null);
+        textPane.setFocusable(false);
+        textPane.setOpaque(true);
+        textPane.setForeground(ThemeManager.getPalette().textPrimary);
         return textPane;
     }
 

@@ -1,4 +1,8 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import platform.*;
 
@@ -160,6 +164,340 @@ public class Specs {
             return BsdRamInfo.getRamFree();
         } else {
             return -1;
+        }
+    }
+
+    public static String getComputerName() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return System.getenv("COMPUTERNAME");
+            } else if (osName.contains("mac") || osName.contains("bsd")) {
+                Process process = Runtime.getRuntime().exec("hostname");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String hostname = reader.readLine();
+                process.waitFor();
+                return hostname != null ? hostname.trim() : "Unknown";
+            } else if (osName.contains("linux")) {
+                Process process = Runtime.getRuntime().exec("hostname");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String hostname = reader.readLine();
+                process.waitFor();
+                return hostname != null ? hostname.trim() : "Unknown";
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static String getNetworkType() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                Process process = Runtime.getRuntime().exec("powershell \"Get-NetAdapter | Where-Object {$_.Status -eq 'Up'} | Select-Object -ExpandProperty Name\"");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.toLowerCase().contains("wi-fi") || line.toLowerCase().contains("wireless")) {
+                        process.waitFor();
+                        return "WiFi";
+                    }
+                }
+                process.waitFor();
+                return "Ethernet";
+            } else if (osName.contains("mac")) {
+                Process process = Runtime.getRuntime().exec("networksetup -listallhardwareports");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                boolean isWifi = false;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("Wi-Fi")) {
+                        isWifi = true;
+                    }
+                    if (isWifi && line.contains("Device:")) {
+                        process.waitFor();
+                        return "WiFi";
+                    }
+                }
+                process.waitFor();
+                return "Ethernet";
+            } else if (osName.contains("linux")) {
+                Process process = Runtime.getRuntime().exec("nmcli device status");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.toLowerCase().contains("wifi") || line.toLowerCase().contains("wlan")) {
+                        process.waitFor();
+                        return "WiFi";
+                    }
+                }
+                process.waitFor();
+                return "Ethernet";
+            } else if (osName.contains("bsd")) {
+                Process process = Runtime.getRuntime().exec("ifconfig");
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.toLowerCase().contains("wlan") || line.toLowerCase().contains("wi")) {
+                        process.waitFor();
+                        return "WiFi";
+                    }
+                }
+                process.waitFor();
+                return "Ethernet";
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static long getCpuBaseClock() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsCpuInfo.getBaseClock();
+            } else if (osName.contains("mac")) {
+                return MacCpuInfo.getBaseClock();
+            } else if (osName.contains("linux")) {
+                return LinuxCpuInfo.getBaseClock();
+            } else if (osName.contains("bsd")) {
+                return BsdCpuInfo.getBaseClock();
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+        return 0;
+    }
+
+    public static long getCpuCurrentClock() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsCpuInfo.getCurrentClock();
+            } else if (osName.contains("mac")) {
+                return MacCpuInfo.getCurrentClock();
+            } else if (osName.contains("linux")) {
+                return LinuxCpuInfo.getCurrentClock();
+            } else if (osName.contains("bsd")) {
+                return BsdCpuInfo.getCurrentClock();
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+        return 0;
+    }
+
+    public static String getCpuL1Cache() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsCpuInfo.getL1Cache();
+            } else if (osName.contains("mac")) {
+                return MacCpuInfo.getL1Cache();
+            } else if (osName.contains("linux")) {
+                return LinuxCpuInfo.getL1Cache();
+            } else if (osName.contains("bsd")) {
+                return BsdCpuInfo.getL1Cache();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static String getCpuL2Cache() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsCpuInfo.getL2Cache();
+            } else if (osName.contains("mac")) {
+                return MacCpuInfo.getL2Cache();
+            } else if (osName.contains("linux")) {
+                return LinuxCpuInfo.getL2Cache();
+            } else if (osName.contains("bsd")) {
+                return BsdCpuInfo.getL2Cache();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static String getCpuL3Cache() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsCpuInfo.getL3Cache();
+            } else if (osName.contains("mac")) {
+                return MacCpuInfo.getL3Cache();
+            } else if (osName.contains("linux")) {
+                return LinuxCpuInfo.getL3Cache();
+            } else if (osName.contains("bsd")) {
+                return BsdCpuInfo.getL3Cache();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static boolean supportsHyperThreading() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsCpuInfo.supportsHyperThreading();
+            } else if (osName.contains("mac")) {
+                return MacCpuInfo.supportsHyperThreading();
+            } else if (osName.contains("linux")) {
+                return LinuxCpuInfo.supportsHyperThreading();
+            } else if (osName.contains("bsd")) {
+                return BsdCpuInfo.supportsHyperThreading();
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
+
+    public static String getRamSpeed() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsRamInfo.getRamSpeed();
+            } else if (osName.contains("mac")) {
+                return MacRamInfo.getRamSpeed();
+            } else if (osName.contains("linux")) {
+                return LinuxRamInfo.getRamSpeed();
+            } else if (osName.contains("bsd")) {
+                return BsdRamInfo.getRamSpeed();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static String getRamLatency() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsRamInfo.getRamLatency();
+            } else if (osName.contains("mac")) {
+                return MacRamInfo.getRamLatency();
+            } else if (osName.contains("linux")) {
+                return LinuxRamInfo.getRamLatency();
+            } else if (osName.contains("bsd")) {
+                return BsdRamInfo.getRamLatency();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static int getRamRanks() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsRamInfo.getRamRanks();
+            } else if (osName.contains("mac")) {
+                return MacRamInfo.getRamRanks();
+            } else if (osName.contains("linux")) {
+                return LinuxRamInfo.getRamRanks();
+            } else if (osName.contains("bsd")) {
+                return BsdRamInfo.getRamRanks();
+            }
+        } catch (Exception e) {
+            return 1;
+        }
+        return 1;
+    }
+
+    public static String getDdrVersion() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsRamInfo.getDdrVersion();
+            } else if (osName.contains("mac")) {
+                return MacRamInfo.getDdrVersion();
+            } else if (osName.contains("linux")) {
+                return LinuxRamInfo.getDdrVersion();
+            } else if (osName.contains("bsd")) {
+                return BsdRamInfo.getDdrVersion();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static String getFormFactor() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return WindowsRamInfo.getFormFactor();
+            } else if (osName.contains("mac")) {
+                return MacRamInfo.getFormFactor();
+            } else if (osName.contains("linux")) {
+                return LinuxRamInfo.getFormFactor();
+            } else if (osName.contains("bsd")) {
+                return BsdRamInfo.getFormFactor();
+            }
+        } catch (Exception e) {
+            return "Unknown";
+        }
+        return "Unknown";
+    }
+
+    public static List<GpuInfo> getAllGpus() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        try {
+            if (osName.contains("win")) {
+                return convertToGpuInfoList(WindowsGpuInfo.getAllGpus());
+            } else if (osName.contains("mac")) {
+                return convertToGpuInfoList(MacGpuInfo.getAllGpus());
+            } else if (osName.contains("linux")) {
+                return convertToGpuInfoList(LinuxGpuInfo.getAllGpus());
+            } else if (osName.contains("bsd")) {
+                return convertToGpuInfoList(BsdGpuInfo.getAllGpus());
+            }
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>();
+    }
+
+    private static List<GpuInfo> convertToGpuInfoList(List<?> platformGpuList) {
+        List<GpuInfo> result = new ArrayList<>();
+        for (Object gpu : platformGpuList) {
+            try {
+                String name = (String) gpu.getClass().getMethod("getName").invoke(gpu);
+                long vram = (long) gpu.getClass().getMethod("getVram").invoke(gpu);
+                result.add(new GpuInfo(name, vram));
+            } catch (Exception e) {
+                // Skip invalid entries
+            }
+        }
+        return result;
+    }
+
+    public static class GpuInfo {
+        private final String name;
+        private final long vram;
+
+        public GpuInfo(String name, long vram) {
+            this.name = name;
+            this.vram = vram;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getVram() {
+            return vram;
         }
     }
 }

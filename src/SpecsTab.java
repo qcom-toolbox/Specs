@@ -44,24 +44,56 @@ public final class SpecsTab {
                     "os",
                     "OS",
                     () -> "Operating System :" + " " + Specs.getOperatingSystemName() + "\n"
-                            + "Version :" + " " + Specs.getOperatingSystemVersion(),
+                            + "Version :" + " " + Specs.getOperatingSystemVersion() + "\n"
+                            + "Computer Name :" + " " + Specs.getComputerName() + "\n"
+                            + "Network :" + " " + Specs.getNetworkType(),
                     InfoPanel::getOsIcon
             ),
             new SpecsTab(
                     "cpu",
                     "CPU",
-                    () -> "CPU :" + " " + Specs.getCpuName() + "\n"
-                            + "Cores :" + " " + Specs.getCpuCores() + "\n"
-                            + "Threads :" + " " + Specs.getCpuThreads(),
+                    () -> {
+                        long baseClock = Specs.getCpuBaseClock();
+                        long currentClock = Specs.getCpuCurrentClock();
+                        String baseClockStr = baseClock > 0 ? String.format("%.2f GHz", baseClock / 1_000_000_000.0) : "Unknown";
+                        String currentClockStr = currentClock > 0 ? String.format("%.2f GHz", currentClock / 1_000_000_000.0) : "Unknown";
+                        String hyperThreading = Specs.supportsHyperThreading() ? "Yes" : "No";
+                        
+                        return "CPU :" + " " + Specs.getCpuName() + "\n"
+                                + "Cores :" + " " + Specs.getCpuCores() + "\n"
+                                + "Threads :" + " " + Specs.getCpuThreads() + "\n"
+                                + "Base Clock :" + " " + baseClockStr + "\n"
+                                + "Current Clock :" + " " + currentClockStr + "\n"
+                                + "L1 Cache :" + " " + Specs.getCpuL1Cache() + "\n"
+                                + "L2 Cache :" + " " + Specs.getCpuL2Cache() + "\n"
+                                + "L3 Cache :" + " " + Specs.getCpuL3Cache() + "\n"
+                                + "Hyper-Threading :" + " " + hyperThreading;
+                    },
                     () -> InfoPanel.getCpuIcon(Specs.getCpuName())
             ),
             new SpecsTab(
                     "gpu",
                     "GPU",
                     () -> {
-                        long vram = Long.parseLong(Specs.getGpuVram());
-                        return "GPU :" + " " + Specs.getGpuName() + "\nVram :"
-                                + " " + (vram == 0L ? "Shared" : vram + " MB");
+                        StringBuilder sb = new StringBuilder();
+                        java.util.List<Specs.GpuInfo> gpus = Specs.getAllGpus();
+                        
+                        if (gpus.isEmpty()) {
+                            long vram = Long.parseLong(Specs.getGpuVram());
+                            sb.append("GPU : ").append(Specs.getGpuName()).append("\n");
+                            sb.append("VRam : ").append(vram == 0L ? "Shared" : vram + " MB");
+                        } else {
+                            for (int i = 0; i < gpus.size(); i++) {
+                                Specs.GpuInfo gpu = gpus.get(i);
+                                sb.append("GPU : ").append(gpu.getName()).append("\n");
+                                sb.append("VRam : ").append(gpu.getVram() == 0L ? "Shared" : gpu.getVram() + " MB");
+                                if (i < gpus.size() - 1) {
+                                    sb.append("\n");
+                                }
+                            }
+                        }
+                        
+                        return sb.toString();
                     },
                     () -> InfoPanel.getGpuIcon(Specs.getGpuName())
             ),
@@ -70,7 +102,12 @@ public final class SpecsTab {
                     "RAM",
                     () -> "RAM (Total) :" + " " + Specs.getRamSize() + " MB" + "\n"
                             + "RAM (Used) :" + " " + Specs.getRamUsed() + " MB" + "\n"
-                            + "RAM (Free) :" + " " + Specs.getRamFree() + " MB",
+                            + "RAM (Free) :" + " " + Specs.getRamFree() + " MB" + "\n"
+                            + "Speed :" + " " + Specs.getRamSpeed() + "\n"
+                            + "Latency :" + " " + Specs.getRamLatency() + "\n"
+                            + "Ranks :" + " " + Specs.getRamRanks() + "\n"
+                            + "DDR Version :" + " " + Specs.getDdrVersion() + "\n"
+                            + "Form Factor :" + " " + Specs.getFormFactor(),
                     InfoPanel::getRamIcon
             )
     );

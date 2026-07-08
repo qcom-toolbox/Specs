@@ -12,6 +12,7 @@ import oshi.hardware.HardwareAbstractionLayer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LinuxGpuInfo {
@@ -249,5 +250,42 @@ public class LinuxGpuInfo {
     // -------------------------
     private static String removeUnwantedParenthesesContent(String name) {
         return name.replaceAll("\\s*\\(.*?\\)", "");
+    }
+
+    public static List<GpuInfo> getAllGpus() {
+        List<GpuInfo> gpus = new ArrayList<>();
+        try {
+            SystemInfo systemInfo = new SystemInfo();
+            HardwareAbstractionLayer hal = systemInfo.getHardware();
+            List<GraphicsCard> graphicsCards = hal.getGraphicsCards();
+
+            for (GraphicsCard gpu : graphicsCards) {
+                String name = removeUnwantedParenthesesContent(gpu.getName());
+                name = cleanNvidiaName(name);
+                long vram = gpu.getVRam() / (1024 * 1024);
+                gpus.add(new GpuInfo(name, vram));
+            }
+        } catch (Exception e) {
+            // Return empty list on error
+        }
+        return gpus;
+    }
+
+    public static class GpuInfo {
+        private final String name;
+        private final long vram;
+
+        public GpuInfo(String name, long vram) {
+            this.name = name;
+            this.vram = vram;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getVram() {
+            return vram;
+        }
     }
 }

@@ -96,4 +96,50 @@ public class LinuxCpuInfo {
         }
         return 0;
     }
+
+    public static long getBaseClock() {
+        try {
+            SystemInfo systemInfo = new SystemInfo();
+            CentralProcessor processor = systemInfo.getHardware().getProcessor();
+            return processor.getMaxFreq();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public static long getCurrentClock() {
+        try {
+            SystemInfo systemInfo = new SystemInfo();
+            CentralProcessor processor = systemInfo.getHardware().getProcessor();
+            long[] freqs = processor.getCurrentFreq();
+            if (freqs != null && freqs.length > 0) {
+                return freqs[0];
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+        return 0;
+    }
+
+    public static String getL1Cache() {
+        return "Unknown";
+    }
+
+    public static String getL2Cache() {
+        return "Unknown";
+    }
+
+    public static String getL3Cache() {
+        return "Unknown";
+    }
+
+    public static boolean supportsHyperThreading() {
+        try {
+            SystemInfo systemInfo = new SystemInfo();
+            CentralProcessor processor = systemInfo.getHardware().getProcessor();
+            return processor.getLogicalProcessorCount() > processor.getPhysicalProcessorCount();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
