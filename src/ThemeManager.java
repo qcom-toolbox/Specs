@@ -32,6 +32,30 @@ public final class ThemeManager {
         }
     }
 
+    public enum ViewMode {
+        TABBED("Tabbed"),
+        LEGACY("Legacy");
+
+        private final String label;
+
+        ViewMode(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public static ViewMode fromLabel(String label) {
+            for (ViewMode mode : values()) {
+                if (mode.label.equalsIgnoreCase(label)) {
+                    return mode;
+                }
+            }
+            return TABBED;
+        }
+    }
+
     public static final class Palette {
         public final Color windowBackground;
         public final Color panelBackground;
@@ -92,6 +116,7 @@ public final class ThemeManager {
 
     private static ThemeMode currentMode = ThemeMode.SYSTEM;
     private static Palette currentPalette = LIGHT_PALETTE;
+    private static ViewMode currentViewMode = ViewMode.TABBED;
     private static Window mainWindow;
 
     private ThemeManager() {
@@ -112,10 +137,19 @@ public final class ThemeManager {
         return currentPalette;
     }
 
+    public static ViewMode getViewMode() {
+        return currentViewMode;
+    }
+
     public static void setMode(ThemeMode mode) {
         currentMode = mode;
         savePreference();
         applyTheme();
+    }
+
+    public static void setViewMode(ViewMode mode) {
+        currentViewMode = mode;
+        savePreference();
     }
 
     public static void applyTheme() {
@@ -203,6 +237,9 @@ public final class ThemeManager {
             tabbedPane.setBackground(palette.windowBackground);
             tabbedPane.setForeground(palette.textPrimary);
             tabbedPane.setOpaque(true);
+        } else if (component.getParent() instanceof JTabbedPane && component instanceof JPanel) {
+            component.setBackground(palette.panelBackground);
+            component.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         } else if (component instanceof JScrollPane scrollPane) {
             scrollPane.setBackground(palette.windowBackground);
             scrollPane.getViewport().setBackground(palette.panelBackground);
@@ -366,8 +403,10 @@ public final class ThemeManager {
             try (InputStream input = Files.newInputStream(PREFERENCES_PATH)) {
                 properties.load(input);
                 currentMode = ThemeMode.fromLabel(properties.getProperty("theme", ThemeMode.SYSTEM.getLabel()));
+                currentViewMode = ViewMode.fromLabel(properties.getProperty("view", ViewMode.TABBED.getLabel()));
             } catch (IOException e) {
                 currentMode = ThemeMode.SYSTEM;
+                currentViewMode = ViewMode.TABBED;
             }
         }
     }
@@ -382,6 +421,7 @@ public final class ThemeManager {
                 }
             }
             properties.setProperty("theme", currentMode.getLabel());
+            properties.setProperty("view", currentViewMode.getLabel());
             try (OutputStream output = Files.newOutputStream(PREFERENCES_PATH)) {
                 properties.store(output, "Specs preferences");
             }

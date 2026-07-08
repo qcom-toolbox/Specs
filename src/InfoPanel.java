@@ -179,22 +179,27 @@ public class InfoPanel {
     }
 
     public static JPanel createInfoPanel(String title, String info, ImageIcon icon) {
-        JPanel panel = new JPanel(new BorderLayout(24, 16));
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createEmptyBorder(24, 24, 24, 24),
-                BorderFactory.createTitledBorder(title)
-        ));
+        JPanel panel = new JPanel(new BorderLayout(16, 12));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel iconLabel = new JLabel(icon);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 16));
-        iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        iconLabel.setVerticalAlignment(SwingConstants.TOP);
+        JPanel headerPanel = new JPanel(new BorderLayout(8, 0));
+        headerPanel.setOpaque(false);
+        
+        ImageIcon scaledIcon = scaleIcon(icon, 48);
+        JLabel iconLabel = new JLabel(scaledIcon);
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12));
+        
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 16f));
+        
+        headerPanel.add(iconLabel, BorderLayout.WEST);
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
 
         JTextPane textPane = createInfoTextPane(info);
 
-        JPanel content = new JPanel(new BorderLayout());
+        JPanel content = new JPanel(new BorderLayout(0, 12));
         content.setOpaque(false);
-        content.add(iconLabel, BorderLayout.WEST);
+        content.add(headerPanel, BorderLayout.NORTH);
         content.add(textPane, BorderLayout.CENTER);
 
         panel.add(content, BorderLayout.CENTER);
@@ -211,7 +216,8 @@ public class InfoPanel {
         Component[] contentChildren = content.getComponents();
         for (Component child : contentChildren) {
             if (child instanceof JLabel iconLabel) {
-                iconLabel.setIcon(icon);
+                ImageIcon scaledIcon = scaleIcon(icon, 64);
+                iconLabel.setIcon(scaledIcon);
             } else if (child instanceof JTextPane textPane) {
                 textPane.setText(info);
             }
@@ -222,11 +228,31 @@ public class InfoPanel {
         JTextPane textPane = new JTextPane();
         textPane.setText(info);
         textPane.setEditable(false);
-        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 15));
+        Font systemFont = getModernFont();
+        textPane.setFont(systemFont.deriveFont(Font.PLAIN, 14f));
         textPane.setBackground(new Color(0, 0, 0, 0));
-        textPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        textPane.setBorder(BorderFactory.createEmptyBorder(12, 0, 0, 0));
         textPane.setFocusable(false);
         textPane.setOpaque(false);
         return textPane;
+    }
+
+    private static Font getModernFont() {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        if (os.contains("mac")) {
+            return new Font("SF Pro Text", Font.PLAIN, 14);
+        } else if (os.contains("win")) {
+            return new Font("Segoe UI", Font.PLAIN, 14);
+        } else {
+            return new Font("Roboto", Font.PLAIN, 14);
+        }
+    }
+
+    private static ImageIcon scaleIcon(ImageIcon icon, int size) {
+        if (icon == null || icon.getIconWidth() <= 0) {
+            return icon;
+        }
+        Image scaled = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
     }
 }

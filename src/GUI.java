@@ -8,6 +8,7 @@ public class GUI {
     private static ImageIcon icon;
     private static JFrame jframe;
     private static JTabbedPane tabbedPane;
+    private static JPanel legacyPanel;
 
     public static void main(String[] args) {
 
@@ -24,10 +25,16 @@ public class GUI {
         jframe.setLayout(new BorderLayout());
 
         JMenuBar menuBar = createMenuBar(uploadHandler);
-        tabbedPane = createTabbedPane();
+
+        if (ThemeManager.getViewMode() == ThemeManager.ViewMode.LEGACY) {
+            legacyPanel = createLegacyPanel();
+            jframe.add(legacyPanel, BorderLayout.CENTER);
+        } else {
+            tabbedPane = createTabbedPane();
+            jframe.add(tabbedPane, BorderLayout.CENTER);
+        }
 
         jframe.setJMenuBar(menuBar);
-        jframe.add(tabbedPane, BorderLayout.CENTER);
 
         ThemeManager.initialize(jframe);
         jframe.setVisible(true);
@@ -64,6 +71,17 @@ public class GUI {
         }
         settingsMenu.add(themeMenu);
 
+        JMenu viewMenu = new JMenu("View");
+        ButtonGroup viewGroup = new ButtonGroup();
+        for (ThemeManager.ViewMode mode : ThemeManager.ViewMode.values()) {
+            JRadioButtonMenuItem viewItem = new JRadioButtonMenuItem(mode.getLabel());
+            viewItem.setSelected(mode == ThemeManager.getViewMode());
+            viewItem.addActionListener(e -> switchViewMode(mode));
+            viewGroup.add(viewItem);
+            viewMenu.add(viewItem);
+        }
+        settingsMenu.add(viewMenu);
+
         JMenuItem aboutItem = new JMenuItem("About");
         aboutItem.addActionListener(e -> About.showAbout(jframe));
         settingsMenu.add(aboutItem);
@@ -94,17 +112,55 @@ public class GUI {
     private static JTabbedPane createTabbedPane() {
         SpecsTab.clearPanels();
 
-        JTabbedPane pane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-        pane.setFont(pane.getFont().deriveFont(Font.BOLD, 13f));
-        pane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        JTabbedPane pane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
+        pane.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
+        pane.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        pane.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
+
+        for (SpecsTab tab : SpecsTab.getTabs()) {
+            String headerTitle = getHeaderTitle(tab.getId());
+            JPanel infoPanel = InfoPanel.createInfoPanel(headerTitle, tab.getContent(), tab.getIcon());
+            SpecsTab.bindPanel(tab.getId(), infoPanel);
+            pane.addTab(tab.getTitle(), scaleIcon(tab.getIcon(), 24), infoPanel, tab.getTitle() + " specifications");
+        }
+
+        return pane;
+    }
+
+    private static String getHeaderTitle(String tabId) {
+        return switch (tabId) {
+            case "os" -> Specs.getOperatingSystemName();
+            case "cpu" -> Specs.getCpuName();
+            case "gpu" -> Specs.getGpuName();
+            case "ram" -> Specs.getRamSize() + " MB";
+            default -> tabId.toUpperCase();
+        };
+    }
+
+    private static Font getModernFont() {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        if (os.contains("mac")) {
+            return new Font("SF Pro Text", Font.PLAIN, 13);
+        } else if (os.contains("win")) {
+            return new Font("Segoe UI", Font.PLAIN, 13);
+        } else {
+            return new Font("Roboto", Font.PLAIN, 13);
+        }
+    }
+
+    private static JPanel createLegacyPanel() {
+        SpecsTab.clearPanels();
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         for (SpecsTab tab : SpecsTab.getTabs()) {
             JPanel infoPanel = InfoPanel.createInfoPanel(tab.getTitle(), tab.getContent(), tab.getIcon());
             SpecsTab.bindPanel(tab.getId(), infoPanel);
-            pane.addTab(tab.getTitle(), scaleIcon(tab.getIcon(), 20), infoPanel, tab.getTitle() + " specifications");
+            panel.add(infoPanel);
         }
 
-        return pane;
+        return panel;
     }
 
     private static ImageIcon scaleIcon(ImageIcon icon, int size) {
@@ -117,7 +173,47 @@ public class GUI {
 
     static void refreshSpecs() {
         SpecsTab.refreshAll();
+        updateHeaderTitles();
         ThemeManager.applyToWindow(jframe);
+    }
+
+    private static void updateHeaderTitles() {
+        for (SpecsTab tab : SpecsTab.getTabs()) {
+            JPanel panel = SpecsTab.getPanel(tab.getId());
+            if (panel != null) {
+                Component[] components = panel.getComponents();
+                if (components.length > 0 && components[0] instanceof JPanel content) {
+                    Component[] contentChildren = content.getComponents();
+                    for (Component child : contentChildren) {
+                        if (child instanceof JPanel header && header.getComponentCount() > 1) {
+                            Component headerChild = header.getComponent(1);
+                            if (headerChild instanceof JLabel titleLabel) {
+                                titleLabel.setText(getHeaderTitle(tab.getId()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    static void switchViewMode(ThemeManager.ViewMode mode) {
+        ThemeManager.setViewMode(mode);
+        jframe.remove(tabbedPane != null ? tabbedPane : legacyPanel);
+        
+        if (mode == ThemeManager.ViewMode.LEGACY) {
+            legacyPanel = createLegacyPanel();
+            tabbedPane = null;
+            jframe.add(legacyPanel, BorderLayout.CENTER);
+        } else {
+            tabbedPane = createTabbedPane();
+            legacyPanel = null;
+            jframe.add(tabbedPane, BorderLayout.CENTER);
+        }
+        
+        ThemeManager.applyToWindow(jframe);
+        jframe.revalidate();
+        jframe.repaint();
     }
 
     static JTabbedPane getTabbedPane() {
