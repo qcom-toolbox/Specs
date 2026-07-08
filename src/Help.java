@@ -34,13 +34,11 @@ public class Help {
         // Add a close button
         JButton closeButton = new JButton("Close");
         closeButton.addActionListener(e -> helpFrame.dispose()); // Close the help window
-        helpFrame.add(closeButton, BorderLayout.SOUTH); // Add the button to the bottom of the window
+        helpFrame.add(closeButton, BorderLayout.SOUTH);
 
-        // Set the icon for the help window
-        helpFrame.setIconImage(icon.getImage()); // Set the window icon
-
-        // Make the window visible
-        helpFrame.setLocationRelativeTo(parent); // Center the help window relative to the parent window
-        helpFrame.setVisible(true); // Show the help window
+        helpFrame.setIconImage(icon.getImage());
+        ThemeManager.applyToWindow(helpFrame);
+        helpFrame.setLocationRelativeTo(parent);
+        helpFrame.setVisible(true);
     }
 }

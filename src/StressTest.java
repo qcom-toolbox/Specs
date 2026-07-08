@@ -35,7 +35,6 @@ public class StressTest {
         infoText.setEditable(false);
         infoText.setLineWrap(true);
         infoText.setWrapStyleWord(true);
-        infoText.setBackground(new Color(240, 240, 240));
         panel.add(new JScrollPane(infoText), BorderLayout.CENTER);
 
         // Input fields for selecting time duration (with default of 60 seconds)
@@ -84,6 +83,7 @@ public class StressTest {
 
         // Add everything to the main frame
         stressTestFrame.add(panel);
+        ThemeManager.applyToWindow(stressTestFrame);
         stressTestFrame.setLocationRelativeTo(parent);
         stressTestFrame.setVisible(true);
     }

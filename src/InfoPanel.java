@@ -178,27 +178,55 @@ public class InfoPanel {
         return loadIcon(iconPath);
     }
 
-    // Method to create an information panel with transparent background
     public static JPanel createInfoPanel(String title, String info, ImageIcon icon) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBorder(BorderFactory.createTitledBorder(title));
+        JPanel panel = new JPanel(new BorderLayout(24, 16));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createEmptyBorder(24, 24, 24, 24),
+                BorderFactory.createTitledBorder(title)
+        ));
 
         JLabel iconLabel = new JLabel(icon);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 16));
+        iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        iconLabel.setVerticalAlignment(SwingConstants.TOP);
 
-        // Use JTextPane for transparency
+        JTextPane textPane = createInfoTextPane(info);
+
+        JPanel content = new JPanel(new BorderLayout());
+        content.setOpaque(false);
+        content.add(iconLabel, BorderLayout.WEST);
+        content.add(textPane, BorderLayout.CENTER);
+
+        panel.add(content, BorderLayout.CENTER);
+        ThemeManager.applyToComponentTree(panel);
+        return panel;
+    }
+
+    public static void updateInfoPanel(JPanel panel, String info, ImageIcon icon) {
+        Component[] components = panel.getComponents();
+        if (components.length == 0 || !(components[0] instanceof JPanel content)) {
+            return;
+        }
+
+        Component[] contentChildren = content.getComponents();
+        for (Component child : contentChildren) {
+            if (child instanceof JLabel iconLabel) {
+                iconLabel.setIcon(icon);
+            } else if (child instanceof JTextPane textPane) {
+                textPane.setText(info);
+            }
+        }
+    }
+
+    private static JTextPane createInfoTextPane(String info) {
         JTextPane textPane = new JTextPane();
         textPane.setText(info);
         textPane.setEditable(false);
-        textPane.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 15));
         textPane.setBackground(new Color(0, 0, 0, 0));
-        textPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        textPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         textPane.setFocusable(false);
         textPane.setOpaque(false);
-
-        panel.add(iconLabel);
-        panel.add(textPane);
-
-        return panel;
+        return textPane;
     }
 }
