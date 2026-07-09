@@ -244,6 +244,12 @@ public class GUI {
         }
         
         ThemeManager.applyToWindow(jframe);
+        
+        // Re-apply custom tab UI after theme application
+        if (tabbedPane != null) {
+            tabbedPane.setUI(new ModernTabbedPaneUI());
+        }
+        
         jframe.revalidate();
         jframe.repaint();
     }
