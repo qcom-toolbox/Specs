@@ -14,11 +14,27 @@ public class Main {
             System.setProperty("apple.awt.application.appearance", resolveMacStartupAppearance());
         }
 
+        if (isWayland()) {
+            System.setProperty("_JAVA_AWT_WM_NONREPARENTING", "1");
+        }
+
         javax.swing.SwingUtilities.invokeLater(() -> GUI.main(args));
     }
 
     private static boolean isMac() {
         return System.getProperty("os.name", "").toLowerCase().contains("mac");
+    }
+
+    private static boolean isWayland() {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        if (!os.contains("linux") && !os.contains("nux")) {
+            return false;
+        }
+        
+        String xdgSessionType = System.getenv("XDG_SESSION_TYPE");
+        String waylandDisplay = System.getenv("WAYLAND_DISPLAY");
+        
+        return "wayland".equalsIgnoreCase(xdgSessionType) || waylandDisplay != null;
     }
 
     private static String resolveMacStartupAppearance() {

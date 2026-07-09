@@ -23,6 +23,7 @@ env:
   DESCRIPTION: Show The Specs Of Your computer
   COPYRIGHT: Copyright © 2024 Qcom-Toolbox
   JLINK_OPTIONS: '--compress=zip-9 --strip-native-commands --strip-debug --no-man-pages --no-header-files'
+  MAC_MIN_VERSION: '10.11'
 
 jobs:
   build-jar:
@@ -200,7 +201,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-13
             arch: x86_64
           - os: macos-14
             arch: arm64
@@ -237,8 +238,11 @@ jobs:
               --app-version "$VERSION" \
               --description "$DESCRIPTION" \
               --vendor "$VENDOR" \
-              --copyright "$COPYRIGHT"
+              --copyright "$COPYRIGHT" \
+              --mac-package-identifier "com.qcom-toolbox.specs" \
+              --mac-package-name "$APP_NAME"
           done
+          /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion $MAC_MIN_VERSION" "release/${APP_NAME}.app/Contents/Info.plist"
           ditto -c -k --sequesterRsrc --keepParent "release/${APP_NAME}.app" "release/${APP_NAME}-${VERSION}-portable-macos-${ARCH}.zip"
           rm -rf "release/${APP_NAME}.app"
 

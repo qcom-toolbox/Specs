@@ -61,10 +61,16 @@ Specs Developpement will come back soon.
 - This feature requires a server to be used.  
 - currently there is no official server available, but you can create one by using the guide [how to create you own Specs Server](https://github.com/enzo-quirici/Specs-Server/).
 
-# Wayland USER :
+# Wayland Support :
 
-- At least on Arch Linux the app may be completly white launch it with the argument :
-```_JAVA_AWT_WM_NONREPARENTING=1 GDK_BACKEND=x11 java -jar Specs.jar```
+The application now includes full automatic Wayland support. When running on a Wayland session, the app will automatically detect the display server and configure the necessary system properties for proper rendering.
+
+**No manual configuration is required** - the app handles Wayland compatibility automatically.
+
+If you encounter any display issues on Wayland, you can still manually force X11 backend by running:
+```bash
+GDK_BACKEND=x11 java -jar Specs.jar
+```
 
 # dependency :
 
