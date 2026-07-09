@@ -60,7 +60,7 @@ public class LinuxRamInfo {
 
     public static String getRamSpeed() {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "sudo dmidecode -t memory | grep 'Speed'");
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "dmidecode -t memory | grep 'Speed'");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -78,7 +78,7 @@ public class LinuxRamInfo {
 
     public static String getRamLatency() {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "sudo dmidecode -t memory | grep 'Configured Voltage'");
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "dmidecode -t memory | grep 'Configured Voltage'");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -99,7 +99,7 @@ public class LinuxRamInfo {
 
     public static int getRamRanks() {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "sudo dmidecode -t memory | grep -c 'Size'");
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "dmidecode -t memory | grep -c 'Size'");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line = reader.readLine();
@@ -114,7 +114,7 @@ public class LinuxRamInfo {
 
     public static String getDdrVersion() {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "sudo dmidecode -t memory | grep 'Type'");
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "dmidecode -t memory | grep 'Type'");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -138,7 +138,7 @@ public class LinuxRamInfo {
 
     public static String getFormFactor() {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "sudo dmidecode -t memory | grep 'Form Factor'");
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "dmidecode -t memory | grep 'Form Factor'");
             Process process = processBuilder.start();
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;

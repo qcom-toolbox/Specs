@@ -26,7 +26,14 @@ env:
 
 jobs:
   build-jar:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.os }}
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -55,7 +62,7 @@ jobs:
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
-          name: jar
+          name: jar-${{ matrix.arch }}
           path: target/Specs.jar
 
   package-windows:
@@ -83,7 +90,7 @@ jobs:
       - name: Download JAR
         uses: actions/download-artifact@v4
         with:
-          name: jar
+          name: jar-x86_64
           path: dist
 
       - name: Package MSI
@@ -138,7 +145,10 @@ jobs:
 
   package-linux:
     needs: build-jar
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x86_64, arm64]
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
 
@@ -153,12 +163,13 @@ jobs:
       - name: Download JAR
         uses: actions/download-artifact@v4
         with:
-          name: jar
+          name: jar-${{ matrix.arch }}
           path: dist
 
       - name: Package DEB, RPM and portable
         env:
           VERSION: ${{ needs.build-jar.outputs.version }}
+          ARCH: ${{ matrix.arch }}
         run: |
           mkdir -p release
           for TYPE in deb rpm app-image; do
@@ -175,18 +186,25 @@ jobs:
               --vendor "$VENDOR" \
               --copyright "$COPYRIGHT"
           done
-          tar -czf "release/${APP_NAME}-${VERSION}-portable-linux.tar.gz" -C release "$APP_NAME"
+          tar -czf "release/${APP_NAME}-${VERSION}-portable-linux-${ARCH}.tar.gz" -C release "$APP_NAME"
           rm -rf "release/$APP_NAME"
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-packages
+          name: linux-packages-${{ matrix.arch }}
           path: release/*
 
   package-macos:
     needs: build-jar
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            arch: x86_64
+          - os: macos-14
+            arch: arm64
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -198,12 +216,13 @@ jobs:
       - name: Download JAR
         uses: actions/download-artifact@v4
         with:
-          name: jar
+          name: jar-${{ matrix.arch }}
           path: dist
 
       - name: Package DMG, PKG and portable
         env:
           VERSION: ${{ needs.build-jar.outputs.version }}
+          ARCH: ${{ matrix.arch }}
         run: |
           mkdir -p release
           for TYPE in dmg pkg app-image; do
@@ -220,13 +239,13 @@ jobs:
               --vendor "$VENDOR" \
               --copyright "$COPYRIGHT"
           done
-          ditto -c -k --sequesterRsrc --keepParent "release/${APP_NAME}.app" "release/${APP_NAME}-${VERSION}-portable-macos.zip"
+          ditto -c -k --sequesterRsrc --keepParent "release/${APP_NAME}.app" "release/${APP_NAME}-${VERSION}-portable-macos-${ARCH}.zip"
           rm -rf "release/${APP_NAME}.app"
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos-packages
+          name: macos-packages-${{ matrix.arch }}
           path: release/*
 
   release:
@@ -237,7 +256,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: packages
-          pattern: '*-packages'
+          pattern: '*-packages*'
           merge-multiple: true
 
       - name: Create GitHub Release
