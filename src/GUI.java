@@ -38,12 +38,7 @@ public class GUI {
         jframe.setJMenuBar(menuBar);
 
         ThemeManager.initialize(jframe);
-        
-        // Re-apply custom tab UI after theme initialization
-        if (tabbedPane != null) {
-            tabbedPane.setUI(new ModernTabbedPaneUI());
-        }
-        
+
         jframe.setVisible(true);
 
         Refresh.startAutoRefresh();
@@ -143,7 +138,13 @@ public class GUI {
     private static JTabbedPane createTabbedPane() {
         SpecsTab.clearPanels();
 
-        JTabbedPane pane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT);
+        JTabbedPane pane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.WRAP_TAB_LAYOUT) {
+            @Override
+            public void updateUI() {
+                super.updateUI();
+                setUI(new ModernTabbedPaneUI());
+            }
+        };
         pane.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
         pane.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         pane.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
@@ -161,7 +162,7 @@ public class GUI {
 
     private static String getHeaderTitle(String tabId) {
         return switch (tabId) {
-            case "os" -> Specs.getOperatingSystemName();
+            case "os" -> Specs.getOperatingSystemName() + " " + Specs.getOperatingSystemVersion();
             case "cpu" -> Specs.getCpuName();
             case "gpu" -> Specs.getGpuName();
             case "ram" -> Specs.getRamSize() + " MB";
@@ -232,7 +233,7 @@ public class GUI {
     static void switchViewMode(ThemeManager.ViewMode mode) {
         ThemeManager.setViewMode(mode);
         jframe.remove(tabbedPane != null ? tabbedPane : legacyPanel);
-        
+
         if (mode == ThemeManager.ViewMode.LEGACY) {
             legacyPanel = createLegacyPanel();
             tabbedPane = null;
@@ -242,14 +243,9 @@ public class GUI {
             legacyPanel = null;
             jframe.add(tabbedPane, BorderLayout.CENTER);
         }
-        
+
         ThemeManager.applyToWindow(jframe);
-        
-        // Re-apply custom tab UI after theme application
-        if (tabbedPane != null) {
-            tabbedPane.setUI(new ModernTabbedPaneUI());
-        }
-        
+
         jframe.revalidate();
         jframe.repaint();
     }
