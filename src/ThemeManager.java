@@ -89,25 +89,25 @@ public final class ThemeManager {
     }
 
     private static final Palette LIGHT_PALETTE = new Palette(
-            new Color(249, 250, 252),
+            new Color(248, 250, 252),
             new Color(255, 255, 255),
-            new Color(15, 23, 42),
-            new Color(100, 116, 139),
-            new Color(226, 232, 240),
+            new Color(30, 41, 59),
+            new Color(71, 85, 105),
+            new Color(203, 213, 225),
             new Color(255, 255, 255),
             new Color(241, 245, 249),
-            new Color(59, 130, 246)
+            new Color(99, 102, 241)
     );
 
     private static final Palette DARK_PALETTE = new Palette(
-            new Color(15, 23, 42),
-            new Color(30, 41, 59),
-            new Color(248, 250, 252),
-            new Color(148, 163, 184),
-            new Color(51, 65, 85),
-            new Color(30, 41, 59),
-            new Color(15, 23, 42),
-            new Color(96, 165, 250)
+            new Color(9, 10, 17),
+            new Color(23, 25, 35),
+            new Color(241, 245, 249),
+            new Color(163, 178, 198),
+            new Color(44, 48, 60),
+            new Color(23, 25, 35),
+            new Color(9, 10, 17),
+            new Color(129, 140, 248)
     );
 
     private static final Path PREFERENCES_PATH = Path.of(
@@ -385,12 +385,14 @@ public final class ThemeManager {
         UIManager.put("TabbedPane.shadow", palette.border);
 
         // Modern scrollbar styling
-        UIManager.put("ScrollBar.width", 10);
-        UIManager.put("ScrollBar.thumb", dark ? new Color(80, 80, 85) : new Color(180, 180, 185));
-        UIManager.put("ScrollBar.thumbDarkShadow", dark ? new Color(60, 60, 65) : new Color(160, 160, 165));
-        UIManager.put("ScrollBar.thumbShadow", dark ? new Color(70, 70, 75) : new Color(170, 170, 175));
+        UIManager.put("ScrollBar.width", 12);
+        UIManager.put("ScrollBar.thumb", dark ? new Color(90, 95, 110) : new Color(170, 175, 190));
+        UIManager.put("ScrollBar.thumbDarkShadow", dark ? new Color(70, 75, 85) : new Color(150, 155, 170));
+        UIManager.put("ScrollBar.thumbShadow", dark ? new Color(80, 85, 95) : new Color(160, 165, 180));
         UIManager.put("ScrollBar.track", palette.windowBackground);
         UIManager.put("ScrollBar.trackHighlight", palette.tabBackground);
+        UIManager.put("ScrollBar.foreground", dark ? new Color(90, 95, 110) : new Color(170, 175, 190));
+        UIManager.put("ScrollBar.background", palette.windowBackground);
 
         if (dark) {
             UIManager.put("nimbusBase", palette.panelBackground);
@@ -400,7 +402,7 @@ public final class ThemeManager {
     }
 
     private static void startSystemThemeWatcher() {
-        Timer timer = new Timer(3000, e -> {
+        Timer timer = new Timer(10000, e -> {
             if (currentMode == ThemeMode.SYSTEM) {
                 boolean wasDark = currentPalette.isDark();
                 boolean isDark = isSystemDarkMode();

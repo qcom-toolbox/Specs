@@ -45,9 +45,35 @@ public class GUI {
     }
 
     private static JMenuBar createMenuBar(Upload uploadHandler) {
-        JMenuBar menuBar = new JMenuBar();
+        JMenuBar menuBar = new JMenuBar() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                ThemeManager.Palette palette = ThemeManager.getPalette();
+                
+                // Draw subtle gradient background
+                Color topColor = palette.panelBackground;
+                Color bottomColor = ThemeManager.blendColors(palette.panelBackground, palette.windowBackground, 0.3);
+                
+                GradientPaint gradient = new GradientPaint(0, 0, topColor, 0, getHeight(), bottomColor);
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+                
+                // Draw subtle bottom border
+                Color borderColor = palette.isDark()
+                    ? new Color(255, 255, 255, 8)
+                    : new Color(0, 0, 0, 6);
+                g2d.setColor(borderColor);
+                g2d.fillRect(0, getHeight() - 1, getWidth(), 1);
+                
+                g2d.dispose();
+            }
+        };
         menuBar.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
         menuBar.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
+        menuBar.setOpaque(false);
         
         JMenu fileMenu = createStyledMenu("File");
 
@@ -255,15 +281,15 @@ public class GUI {
     }
 
     private static class ModernTabbedPaneUI extends BasicTabbedPaneUI {
-        private static final int TAB_PADDING = 12;
-        private static final int TAB_HEIGHT = 40;
-        private static final int ARC_SIZE = 8;
-        private static final int TAB_GAP = 4;
+        private static final int TAB_PADDING = 16;
+        private static final int TAB_HEIGHT = 44;
+        private static final int ARC_SIZE = 10;
+        private static final int TAB_GAP = 6;
 
         @Override
         protected void installDefaults() {
             super.installDefaults();
-            tabInsets = new Insets(8, TAB_PADDING, 8, TAB_PADDING);
+            tabInsets = new Insets(10, TAB_PADDING, 10, TAB_PADDING);
         }
 
         @Override
@@ -288,20 +314,34 @@ public class GUI {
 
             ThemeManager.Palette palette = ThemeManager.getPalette();
 
-            // Draw tab background
+            // Draw tab background with subtle gradient for selected tab
             if (isSelected) {
                 g2d.setColor(palette.tabSelected);
+                // Add subtle highlight effect
+                g2d.setColor(new Color(255, 255, 255, palette.isDark() ? 8 : 15));
+                g2d.fillRoundRect(tabRect.x + TAB_GAP / 2, tabRect.y + 2, 
+                                  tabRect.width - TAB_GAP, 8, ARC_SIZE, ARC_SIZE);
+                g2d.setColor(palette.tabSelected);
             } else if (isRollover) {
-                g2d.setColor(ThemeManager.blendColors(palette.tabBackground, palette.tabSelected, 0.5));
+                g2d.setColor(ThemeManager.blendColors(palette.tabBackground, palette.tabSelected, 0.4));
             } else {
                 g2d.setColor(palette.tabBackground);
             }
 
             // Draw rounded rectangle for tab
             int arc = ARC_SIZE;
-            int y = tabRect.y + 2;
-            int height = tabRect.height - 4;
+            int y = tabRect.y + 3;
+            int height = tabRect.height - 6;
             g2d.fillRoundRect(tabRect.x + TAB_GAP / 2, y, tabRect.width - TAB_GAP, height, arc, arc);
+
+            // Draw subtle border
+            if (isSelected) {
+                Color borderColor = palette.isDark()
+                    ? new Color(255, 255, 255, 12)
+                    : new Color(0, 0, 0, 8);
+                g2d.setColor(borderColor);
+                g2d.drawRoundRect(tabRect.x + TAB_GAP / 2, y, tabRect.width - TAB_GAP - 1, height - 1, arc, arc);
+            }
 
             // Draw text and icon
             if (isSelected) {

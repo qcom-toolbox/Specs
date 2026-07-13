@@ -6,6 +6,9 @@ import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class WindowsCpuInfo {
 
     public static String getCpuName() {
@@ -102,5 +105,24 @@ public class WindowsCpuInfo {
             return "x86";
         }
         return arch;
+    }
+
+    public static String getSupportedTechnologies() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("powershell", 
+                "Get-WmiObject Win32_Processor | Select-Object -ExpandProperty Caption");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            
+            if (line != null && !line.isEmpty()) {
+                return line;
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
     }
 }

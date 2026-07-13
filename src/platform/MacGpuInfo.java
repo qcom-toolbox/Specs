@@ -6,6 +6,8 @@ import oshi.SystemInfo;
 import oshi.hardware.GraphicsCard;
 import oshi.hardware.HardwareAbstractionLayer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,5 +80,53 @@ public class MacGpuInfo {
         public long getVram() {
             return vram;
         }
+    }
+
+    public static String getDisplayManager() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("system_profiler", "SPDisplaysDataType");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("Metal")) {
+                    return "Metal";
+                } else if (line.contains("OpenGL")) {
+                    return "OpenGL";
+                }
+            }
+            process.waitFor();
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
+    }
+
+    public static String getSupportedTechnologies() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("system_profiler", "SPDisplaysDataType");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            StringBuilder technologies = new StringBuilder();
+            
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("Metal:") || line.contains("OpenGL:") || line.contains("OpenCL:")) {
+                    String tech = line.split(":")[1].trim();
+                    technologies.append(tech).append(", ");
+                }
+            }
+            process.waitFor();
+            
+            if (technologies.length() > 0) {
+                return technologies.substring(0, technologies.length() - 2);
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
     }
 }

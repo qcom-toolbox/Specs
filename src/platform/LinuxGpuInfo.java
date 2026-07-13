@@ -288,4 +288,58 @@ public class LinuxGpuInfo {
             return vram;
         }
     }
+
+    public static String getDisplayManager() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", 
+                "echo $XDG_SESSION_TYPE");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            
+            if (line != null && !line.isEmpty()) {
+                if (line.equals("wayland")) {
+                    return "Wayland";
+                } else if (line.equals("x11")) {
+                    return "X11";
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        // Fallback to checking for X11
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", "ps aux | grep Xorg");
+            Process process = processBuilder.start();
+            process.waitFor();
+            if (process.exitValue() == 0) {
+                return "X11";
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
+    }
+
+    public static String getSupportedTechnologies() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", 
+                "glxinfo | grep 'OpenGL version' | awk -F: '{print $2}'");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            
+            if (line != null && !line.isEmpty()) {
+                return line.trim();
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
+    }
 }

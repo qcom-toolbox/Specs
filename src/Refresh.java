@@ -21,7 +21,6 @@ public class Refresh {
     private static void refreshSpecs() {
         try {
             GUI.refreshSpecs();
-            System.gc();
         } catch (Exception e) {
             System.err.println("Unexpected error while updating system specs: " + e.getMessage());
         }

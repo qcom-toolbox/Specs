@@ -6,6 +6,9 @@ import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class MacCpuInfo {
 
     public static String getCpuName() {
@@ -109,5 +112,27 @@ public class MacCpuInfo {
             return "x86";
         }
         return arch;
+    }
+
+    public static String getSupportedTechnologies() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("sysctl", "-a");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            
+            StringBuilder technologies = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("machdep.cpu.features") || line.contains("machdep.cpu.extfeatures")) {
+                    String features = line.split(":")[1].trim();
+                    technologies.append(features).append(" ");
+                }
+            }
+            process.waitFor();
+            
+            return technologies.length() > 0 ? technologies.toString().trim() : "Unknown";
+        } catch (Exception e) {
+            return "Unknown";
+        }
     }
 }

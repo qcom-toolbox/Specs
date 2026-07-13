@@ -177,4 +177,23 @@ public class LinuxCpuInfo {
         }
         return arch;
     }
+
+    public static String getSupportedTechnologies() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", 
+                "lscpu | grep 'Flags' | awk -F: '{print $2}'");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            
+            if (line != null && !line.isEmpty()) {
+                return line.trim();
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
+    }
 }

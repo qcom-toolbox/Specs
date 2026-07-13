@@ -3,6 +3,8 @@ package platform;
 import oshi.SystemInfo;
 import oshi.hardware.GraphicsCard;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,5 +99,43 @@ public class WindowsGpuInfo {
         public long getVram() {
             return vram;
         }
+    }
+
+    public static String getDisplayManager() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("powershell", 
+                "Get-WmiObject Win32_DesktopMonitor | Select-Object -ExpandProperty Name");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            
+            if (line != null && !line.isEmpty()) {
+                return line;
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "Unknown";
+    }
+
+    public static String getSupportedTechnologies() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("powershell", 
+                "Get-WmiObject Win32_VideoController | Select-Object -ExpandProperty DriverVersion");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = reader.readLine();
+            process.waitFor();
+            
+            if (line != null && !line.isEmpty()) {
+                return "DirectX 12, " + line;
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+        
+        return "DirectX 12";
     }
 }

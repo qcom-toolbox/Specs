@@ -8,15 +8,19 @@ import java.awt.*;
 import java.util.Objects;
 
 public class InfoPanel {
+    private static final java.util.Map<String, ImageIcon> iconCache = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.Map<String, ImageIcon> scaledIconCache = new java.util.concurrent.ConcurrentHashMap<>();
 
     // General method to load an icon from a path
     private static ImageIcon loadIcon(String path) {
-        try {
-            return new ImageIcon(Objects.requireNonNull(InfoPanel.class.getResource(path), "Icon not found: " + path));
-        } catch (NullPointerException e) {
-            System.err.println(e.getMessage());
-            return new ImageIcon();
-        }
+        return iconCache.computeIfAbsent(path, p -> {
+            try {
+                return new ImageIcon(Objects.requireNonNull(InfoPanel.class.getResource(p), "Icon not found: " + p));
+            } catch (NullPointerException e) {
+                System.err.println(e.getMessage());
+                return new ImageIcon();
+            }
+        });
     }
 
     // Method to get the OS icon
@@ -214,8 +218,11 @@ public class InfoPanel {
             if (child instanceof JLabel iconLabel) {
                 ImageIcon scaledIcon = scaleIcon(icon, 64);
                 iconLabel.setIcon(scaledIcon);
-            } else if (child instanceof JTextPane textPane) {
-                textPane.setText(info);
+            } else if (child instanceof JScrollPane scrollPane) {
+                Component viewport = scrollPane.getViewport().getComponent(0);
+                if (viewport instanceof JTextPane textPane) {
+                    textPane.setText(info);
+                }
             }
         }
     }
@@ -234,40 +241,60 @@ public class InfoPanel {
 
     public static JPanel createModernInfoPanel(String title, String info, ImageIcon icon) {
         JPanel mainPanel = new JPanel(new BorderLayout(0, 0));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         mainPanel.setOpaque(false);
 
-        JPanel cardPanel = new JPanel(new BorderLayout(16, 16));
-        cardPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(20, 24, 20, 24),
-            BorderFactory.createEmptyBorder(0, 0, 0, 0)
-        ));
-        cardPanel.setBackground(ThemeManager.getPalette().panelBackground);
-        cardPanel.setOpaque(true);
-
-        // Add subtle shadow effect using compound border
-        cardPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(2, 2, 2, 2),
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0, 0, 0, 20), 1, true),
-                BorderFactory.createEmptyBorder(20, 24, 20, 24)
-            )
-        ));
+        JPanel cardPanel = new JPanel(new BorderLayout(16, 16)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                
+                ThemeManager.Palette palette = ThemeManager.getPalette();
+                
+                // Draw shadow
+                int shadowOffset = 4;
+                Color shadowColor = palette.isDark() 
+                    ? new Color(0, 0, 0, 60) 
+                    : new Color(0, 0, 0, 15);
+                g2d.setColor(shadowColor);
+                g2d.fillRoundRect(shadowOffset, shadowOffset, getWidth() - shadowOffset, 
+                                  getHeight() - shadowOffset, 16, 16);
+                
+                // Draw card background
+                g2d.setColor(palette.panelBackground);
+                g2d.fillRoundRect(0, 0, getWidth() - shadowOffset, 
+                                  getHeight() - shadowOffset, 16, 16);
+                
+                // Draw subtle border
+                Color borderColor = palette.isDark()
+                    ? new Color(255, 255, 255, 8)
+                    : new Color(0, 0, 0, 6);
+                g2d.setColor(borderColor);
+                g2d.drawRoundRect(0, 0, getWidth() - shadowOffset - 1, 
+                                  getHeight() - shadowOffset - 1, 16, 16);
+                
+                g2d.dispose();
+            }
+        };
+        cardPanel.setBorder(BorderFactory.createEmptyBorder(24, 28, 24, 28));
+        cardPanel.setOpaque(false);
 
         JPanel headerPanel = new JPanel(new BorderLayout(12, 0));
         headerPanel.setOpaque(false);
         
-        ImageIcon scaledIcon = scaleIcon(icon, 56);
+        ImageIcon scaledIcon = scaleIcon(icon, 64);
         JLabel iconLabel = new JLabel(scaledIcon);
         iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
         
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 18f));
+        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 20f));
         titleLabel.setForeground(ThemeManager.getPalette().textPrimary);
         
         headerPanel.add(iconLabel, BorderLayout.WEST);
         headerPanel.add(titleLabel, BorderLayout.CENTER);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
         JTextPane textPane = createModernTextPane(info);
         JScrollPane scrollPane = new JScrollPane(textPane);
@@ -293,32 +320,36 @@ public class InfoPanel {
         JTextPane textPane = new JTextPane();
         textPane.setText(info);
         textPane.setEditable(false);
-        Font systemFont = getModernFont();
-        textPane.setFont(systemFont.deriveFont(Font.PLAIN, 13f));
+        
+        String os = System.getProperty("os.name", "").toLowerCase();
+        Font monoFont;
+        if (os.contains("mac")) {
+            monoFont = new Font("SF Mono", Font.PLAIN, 13);
+        } else if (os.contains("win")) {
+            monoFont = new Font("Consolas", Font.PLAIN, 13);
+        } else {
+            monoFont = new Font("Monospace", Font.PLAIN, 13);
+        }
+        
+        textPane.setFont(monoFont);
         textPane.setBackground(new Color(0, 0, 0, 0));
-        textPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        textPane.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         textPane.setFocusable(false);
         textPane.setOpaque(false);
         textPane.setForeground(ThemeManager.getPalette().textPrimary);
+        
         return textPane;
     }
 
-    private static Font getModernFont() {
-        String os = System.getProperty("os.name", "").toLowerCase();
-        if (os.contains("mac")) {
-            return new Font("SF Pro Text", Font.PLAIN, 14);
-        } else if (os.contains("win")) {
-            return new Font("Segoe UI", Font.PLAIN, 14);
-        } else {
-            return new Font("Roboto", Font.PLAIN, 14);
-        }
-    }
 
     private static ImageIcon scaleIcon(ImageIcon icon, int size) {
         if (icon == null || icon.getIconWidth() <= 0) {
             return icon;
         }
-        Image scaled = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
-        return new ImageIcon(scaled);
+        String cacheKey = icon.toString() + "_" + size;
+        return scaledIconCache.computeIfAbsent(cacheKey, k -> {
+            Image scaled = icon.getImage().getScaledInstance(size, size, Image.SCALE_SMOOTH);
+            return new ImageIcon(scaled);
+        });
     }
 }
