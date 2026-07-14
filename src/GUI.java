@@ -45,35 +45,13 @@ public class GUI {
     }
 
     private static JMenuBar createMenuBar(Upload uploadHandler) {
-        JMenuBar menuBar = new JMenuBar() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g.create();
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                ThemeManager.Palette palette = ThemeManager.getPalette();
-                
-                // Draw subtle gradient background
-                Color topColor = palette.panelBackground;
-                Color bottomColor = ThemeManager.blendColors(palette.panelBackground, palette.windowBackground, 0.3);
-                
-                GradientPaint gradient = new GradientPaint(0, 0, topColor, 0, getHeight(), bottomColor);
-                g2d.setPaint(gradient);
-                g2d.fillRect(0, 0, getWidth(), getHeight());
-                
-                // Draw subtle bottom border
-                Color borderColor = palette.isDark()
-                    ? new Color(255, 255, 255, 8)
-                    : new Color(0, 0, 0, 6);
-                g2d.setColor(borderColor);
-                g2d.fillRect(0, getHeight() - 1, getWidth(), 1);
-                
-                g2d.dispose();
-            }
-        };
-        menuBar.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-        menuBar.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
-        menuBar.setOpaque(false);
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_SM, 
+                                                      ThemeManager.SPACING_MD, 
+                                                      ThemeManager.SPACING_SM, 
+                                                      ThemeManager.SPACING_MD));
+        menuBar.setFont(ThemeManager.getFont(ThemeManager.FontScale.BODY, ThemeManager.FontWeight.REGULAR));
+        menuBar.setBackground(ThemeManager.getPalette().panelBackground);
         
         JMenu fileMenu = createStyledMenu("File");
 
@@ -142,22 +120,34 @@ public class GUI {
 
     private static JMenu createStyledMenu(String text) {
         JMenu menu = new JMenu(text);
-        menu.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
-        menu.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        menu.setFont(ThemeManager.getFont(ThemeManager.FontScale.BODY, ThemeManager.FontWeight.MEDIUM));
+        menu.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_SM, 
+                                                     ThemeManager.SPACING_MD, 
+                                                     ThemeManager.SPACING_SM, 
+                                                     ThemeManager.SPACING_MD));
+        menu.setBackground(new Color(0, 0, 0, 0));
         return menu;
     }
 
     private static JMenuItem createStyledMenuItem(String text) {
         JMenuItem item = new JMenuItem(text);
-        item.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
-        item.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        item.setFont(ThemeManager.getFont(ThemeManager.FontScale.BODY, ThemeManager.FontWeight.REGULAR));
+        item.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_SM, 
+                                                     ThemeManager.SPACING_LG, 
+                                                     ThemeManager.SPACING_SM, 
+                                                     ThemeManager.SPACING_LG));
+        item.setBackground(new Color(0, 0, 0, 0));
         return item;
     }
 
     private static JRadioButtonMenuItem createStyledRadioButtonMenuItem(String text) {
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(text);
-        item.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
-        item.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        item.setFont(ThemeManager.getFont(ThemeManager.FontScale.BODY, ThemeManager.FontWeight.REGULAR));
+        item.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_SM, 
+                                                     ThemeManager.SPACING_LG, 
+                                                     ThemeManager.SPACING_SM, 
+                                                     ThemeManager.SPACING_LG));
+        item.setBackground(new Color(0, 0, 0, 0));
         return item;
     }
 
@@ -171,8 +161,11 @@ public class GUI {
                 setUI(new ModernTabbedPaneUI());
             }
         };
-        pane.setFont(getModernFont().deriveFont(Font.PLAIN, 13f));
-        pane.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        pane.setFont(ThemeManager.getFont(ThemeManager.FontScale.BODY, ThemeManager.FontWeight.REGULAR));
+        pane.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_XL, 
+                                                     ThemeManager.SPACING_XL, 
+                                                     ThemeManager.SPACING_XL, 
+                                                     ThemeManager.SPACING_XL));
         pane.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
         pane.setUI(new ModernTabbedPaneUI());
 
@@ -180,7 +173,7 @@ public class GUI {
             String headerTitle = getHeaderTitle(tab.getId());
             JPanel infoPanel = InfoPanel.createModernInfoPanel(headerTitle, tab.getContent(), tab.getIcon());
             SpecsTab.bindPanel(tab.getId(), infoPanel);
-            pane.addTab(tab.getTitle(), scaleIcon(tab.getIcon(), 24), infoPanel, tab.getTitle() + " specifications");
+            pane.addTab(tab.getTitle(), scaleIcon(tab.getIcon(), 28), infoPanel, tab.getTitle() + " specifications");
         }
 
         return pane;
@@ -194,17 +187,6 @@ public class GUI {
             case "ram" -> Specs.getRamSize() + " MB";
             default -> tabId.toUpperCase();
         };
-    }
-
-    private static Font getModernFont() {
-        String os = System.getProperty("os.name", "").toLowerCase();
-        if (os.contains("mac")) {
-            return new Font("SF Pro Text", Font.PLAIN, 13);
-        } else if (os.contains("win")) {
-            return new Font("Segoe UI", Font.PLAIN, 13);
-        } else {
-            return new Font("Roboto", Font.PLAIN, 13);
-        }
     }
 
     private static JPanel createLegacyPanel() {
@@ -281,15 +263,15 @@ public class GUI {
     }
 
     private static class ModernTabbedPaneUI extends BasicTabbedPaneUI {
-        private static final int TAB_PADDING = 16;
-        private static final int TAB_HEIGHT = 44;
+        private static final int TAB_PADDING = ThemeManager.SPACING_LG;
+        private static final int TAB_HEIGHT = 48;
         private static final int ARC_SIZE = 10;
         private static final int TAB_GAP = 6;
 
         @Override
         protected void installDefaults() {
             super.installDefaults();
-            tabInsets = new Insets(10, TAB_PADDING, 10, TAB_PADDING);
+            tabInsets = new Insets(ThemeManager.SPACING_SM, TAB_PADDING, ThemeManager.SPACING_SM, TAB_PADDING);
         }
 
         @Override
@@ -304,55 +286,37 @@ public class GUI {
 
         @Override
         protected void paintTab(Graphics g, int tabPlacement, Rectangle[] rects, int tabIndex, Rectangle iconRect, Rectangle textRect) {
-            Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
             Rectangle tabRect = rects[tabIndex];
             boolean isSelected = tabIndex == tabPane.getSelectedIndex();
             boolean isRollover = getRolloverTab() == tabIndex;
 
             ThemeManager.Palette palette = ThemeManager.getPalette();
 
-            // Draw tab background with subtle gradient for selected tab
+            // Simple tab background
             if (isSelected) {
-                g2d.setColor(palette.tabSelected);
-                // Add subtle highlight effect
-                g2d.setColor(new Color(255, 255, 255, palette.isDark() ? 8 : 15));
-                g2d.fillRoundRect(tabRect.x + TAB_GAP / 2, tabRect.y + 2, 
-                                  tabRect.width - TAB_GAP, 8, ARC_SIZE, ARC_SIZE);
-                g2d.setColor(palette.tabSelected);
+                g.setColor(palette.tabSelected);
             } else if (isRollover) {
-                g2d.setColor(ThemeManager.blendColors(palette.tabBackground, palette.tabSelected, 0.4));
+                g.setColor(ThemeManager.blendColors(palette.tabBackground, palette.tabSelected, 0.3));
             } else {
-                g2d.setColor(palette.tabBackground);
+                g.setColor(palette.tabBackground);
             }
 
-            // Draw rounded rectangle for tab
-            int arc = ARC_SIZE;
-            int y = tabRect.y + 3;
-            int height = tabRect.height - 6;
-            g2d.fillRoundRect(tabRect.x + TAB_GAP / 2, y, tabRect.width - TAB_GAP, height, arc, arc);
+            g.fillRoundRect(tabRect.x + TAB_GAP / 2, tabRect.y + 2, 
+                          tabRect.width - TAB_GAP, tabRect.height - 4, ARC_SIZE, ARC_SIZE);
 
-            // Draw subtle border
-            if (isSelected) {
-                Color borderColor = palette.isDark()
-                    ? new Color(255, 255, 255, 12)
-                    : new Color(0, 0, 0, 8);
-                g2d.setColor(borderColor);
-                g2d.drawRoundRect(tabRect.x + TAB_GAP / 2, y, tabRect.width - TAB_GAP - 1, height - 1, arc, arc);
-            }
+            // Simple border
+            g.setColor(palette.border);
+            g.drawRoundRect(tabRect.x + TAB_GAP / 2, tabRect.y + 2, 
+                          tabRect.width - TAB_GAP - 1, tabRect.height - 5, ARC_SIZE, ARC_SIZE);
 
-            // Draw text and icon
+            // Text and icon color
             if (isSelected) {
-                g2d.setColor(palette.textPrimary);
+                g.setColor(palette.textPrimary);
             } else {
-                g2d.setColor(palette.textSecondary);
+                g.setColor(palette.textSecondary);
             }
 
-            super.paintTab(g2d, tabPlacement, rects, tabIndex, iconRect, textRect);
-
-            g2d.dispose();
+            super.paintTab(g, tabPlacement, rects, tabIndex, iconRect, textRect);
         }
 
         @Override

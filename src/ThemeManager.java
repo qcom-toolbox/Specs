@@ -65,10 +65,20 @@ public final class ThemeManager {
         public final Color tabSelected;
         public final Color tabBackground;
         public final Color accent;
+        public final Color surface1;
+        public final Color surface2;
+        public final Color surface3;
+        public final Color success;
+        public final Color warning;
+        public final Color error;
+        public final Color glow;
+        public final Color glassOverlay;
 
         public Palette(Color windowBackground, Color panelBackground, Color textPrimary,
                        Color textSecondary, Color border, Color tabSelected,
-                       Color tabBackground, Color accent) {
+                       Color tabBackground, Color accent, Color surface1, Color surface2,
+                       Color surface3, Color success, Color warning, Color error,
+                       Color glow, Color glassOverlay) {
             this.windowBackground = windowBackground;
             this.panelBackground = panelBackground;
             this.textPrimary = textPrimary;
@@ -77,6 +87,14 @@ public final class ThemeManager {
             this.tabSelected = tabSelected;
             this.tabBackground = tabBackground;
             this.accent = accent;
+            this.surface1 = surface1;
+            this.surface2 = surface2;
+            this.surface3 = surface3;
+            this.success = success;
+            this.warning = warning;
+            this.error = error;
+            this.glow = glow;
+            this.glassOverlay = glassOverlay;
         }
 
         public boolean isDark() {
@@ -89,25 +107,41 @@ public final class ThemeManager {
     }
 
     private static final Palette LIGHT_PALETTE = new Palette(
-            new Color(248, 250, 252),
+            new Color(250, 252, 255),
             new Color(255, 255, 255),
             new Color(30, 41, 59),
             new Color(71, 85, 105),
             new Color(203, 213, 225),
             new Color(255, 255, 255),
             new Color(241, 245, 249),
-            new Color(99, 102, 241)
+            new Color(99, 102, 241),
+            new Color(250, 252, 255),
+            new Color(245, 248, 252),
+            new Color(230, 235, 242),
+            new Color(34, 197, 94),
+            new Color(234, 179, 8),
+            new Color(239, 68, 68),
+            new Color(99, 102, 241),
+            new Color(255, 255, 255, 140)
     );
 
     private static final Palette DARK_PALETTE = new Palette(
-            new Color(9, 10, 17),
-            new Color(23, 25, 35),
-            new Color(241, 245, 249),
-            new Color(163, 178, 198),
-            new Color(44, 48, 60),
-            new Color(23, 25, 35),
-            new Color(9, 10, 17),
-            new Color(129, 140, 248)
+            new Color(15, 17, 28),
+            new Color(28, 30, 42),
+            new Color(235, 240, 250),
+            new Color(156, 172, 195),
+            new Color(55, 60, 75),
+            new Color(28, 30, 42),
+            new Color(20, 22, 35),
+            new Color(129, 140, 248),
+            new Color(28, 30, 42),
+            new Color(35, 38, 52),
+            new Color(45, 48, 65),
+            new Color(74, 222, 128),
+            new Color(250, 204, 21),
+            new Color(248, 113, 113),
+            new Color(129, 140, 248),
+            new Color(255, 255, 255, 100)
     );
 
     private static final Path PREFERENCES_PATH = Path.of(
@@ -143,6 +177,195 @@ public final class ThemeManager {
         int b = (int) (c1.getBlue() * (1 - ratio) + c2.getBlue() * ratio);
         int a = (int) (c1.getAlpha() * (1 - ratio) + c2.getAlpha() * ratio);
         return new Color(r, g, b, a);
+    }
+
+    public static Color createGlassOverlay(Color baseColor, double opacity) {
+        return new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), 
+                         (int) (255 * opacity));
+    }
+
+    public static Color createShadow(Color baseColor, int elevation) {
+        double shadowOpacity = 0.08 + (elevation * 0.04);
+        return new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(),
+                         (int) (255 * Math.min(shadowOpacity, 0.35)));
+    }
+
+    public static Color createGlow(Color accentColor, double intensity) {
+        return new Color(accentColor.getRed(), accentColor.getGreen(), accentColor.getBlue(),
+                         (int) (255 * Math.min(intensity, 0.5)));
+    }
+
+    public static double easeInOut(double t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    public static double easeOut(double t) {
+        return t * (2 - t);
+    }
+
+    public static double easeIn(double t) {
+        return t * t;
+    }
+
+    public static Color interpolateColor(Color c1, Color c2, double t) {
+        double easedT = easeInOut(t);
+        return blendColors(c1, c2, easedT);
+    }
+
+    // Typography System
+    public enum FontScale {
+        DISPLAY(32f),
+        HEADING_LARGE(24f),
+        HEADING_MEDIUM(20f),
+        HEADING_SMALL(18f),
+        BODY_LARGE(16f),
+        BODY(14f),
+        BODY_SMALL(13f),
+        CAPTION(12f),
+        LABEL(11f);
+
+        private final float size;
+
+        FontScale(float size) {
+            this.size = size;
+        }
+
+        public float getSize() {
+            return size;
+        }
+    }
+
+    public enum FontWeight {
+        LIGHT(0.85f),
+        REGULAR(1.0f),
+        MEDIUM(1.25f),
+        SEMIBOLD(1.5f),
+        BOLD(2.0f);
+
+        private final float weight;
+
+        FontWeight(float weight) {
+            this.weight = weight;
+        }
+
+        public float getWeight() {
+            return weight;
+        }
+    }
+
+    // Spacing Scale (4px base unit)
+    public static final int SPACING_UNIT = 4;
+    public static final int SPACING_XS = SPACING_UNIT;
+    public static final int SPACING_SM = SPACING_UNIT * 2;
+    public static final int SPACING_MD = SPACING_UNIT * 3;
+    public static final int SPACING_LG = SPACING_UNIT * 4;
+    public static final int SPACING_XL = SPACING_UNIT * 6;
+    public static final int SPACING_XXL = SPACING_UNIT * 8;
+
+    public static Font getFont(FontScale scale, FontWeight weight) {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String fontName;
+        
+        if (os.contains("mac")) {
+            fontName = "SF Pro Text";
+        } else if (os.contains("win")) {
+            fontName = "Segoe UI";
+        } else {
+            fontName = "Roboto";
+        }
+        
+        Font baseFont = new Font(fontName, Font.PLAIN, (int) scale.getSize());
+        return baseFont.deriveFont(weight.getWeight() * scale.getSize());
+    }
+
+    public static Font getMonoFont(FontScale scale) {
+        String os = System.getProperty("os.name", "").toLowerCase();
+        String fontName;
+        
+        if (os.contains("mac")) {
+            fontName = "SF Mono";
+        } else if (os.contains("win")) {
+            fontName = "Consolas";
+        } else {
+            fontName = "Monospace";
+        }
+        
+        return new Font(fontName, Font.PLAIN, (int) scale.getSize());
+    }
+
+    // Animation constants
+    public static final int ANIMATION_FAST = 150;
+    public static final int ANIMATION_NORMAL = 250;
+    public static final int ANIMATION_SLOW = 400;
+    
+    public static class AnimatedComponent {
+        protected float animationProgress = 0f;
+        protected boolean isAnimating = false;
+        protected long animationStartTime = 0;
+        protected int animationDuration = ANIMATION_NORMAL;
+        
+        public void startAnimation() {
+            animationStartTime = System.currentTimeMillis();
+            isAnimating = true;
+            animationProgress = 0f;
+        }
+        
+        public void updateAnimation() {
+            if (!isAnimating) return;
+            
+            long elapsed = System.currentTimeMillis() - animationStartTime;
+            animationProgress = Math.min(elapsed / (float) animationDuration, 1f);
+            
+            if (animationProgress >= 1f) {
+                isAnimating = false;
+            }
+        }
+        
+        public float getAnimationProgress() {
+            return animationProgress;
+        }
+        
+        public boolean isAnimating() {
+            return isAnimating;
+        }
+        
+        public float getEasedProgress() {
+            return (float) easeInOut(animationProgress);
+        }
+    }
+    
+    public static class FadeInComponent extends AnimatedComponent {
+        public float getAlpha() {
+            return getEasedProgress();
+        }
+    }
+    
+    public static class ScaleComponent extends AnimatedComponent {
+        private float minScale = 0.95f;
+        private float maxScale = 1.0f;
+        
+        public float getScale() {
+            float eased = getEasedProgress();
+            return minScale + (maxScale - minScale) * eased;
+        }
+    }
+    
+    public static class SlideComponent extends AnimatedComponent {
+        private float startX = 0f;
+        private float endX = 0f;
+        
+        public void setStartX(float x) {
+            this.startX = x;
+        }
+        
+        public void setEndX(float x) {
+            this.endX = x;
+        }
+        
+        public float getCurrentX() {
+            float eased = getEasedProgress();
+            return startX + (endX - startX) * eased;
+        }
     }
 
     public static ViewMode getViewMode() {
@@ -384,8 +607,8 @@ public final class ThemeManager {
         UIManager.put("TabbedPane.darkShadow", palette.border);
         UIManager.put("TabbedPane.shadow", palette.border);
 
-        // Modern scrollbar styling
-        UIManager.put("ScrollBar.width", 12);
+        // Modern scrollbar styling with enhanced appearance
+        UIManager.put("ScrollBar.width", 14);
         UIManager.put("ScrollBar.thumb", dark ? new Color(90, 95, 110) : new Color(170, 175, 190));
         UIManager.put("ScrollBar.thumbDarkShadow", dark ? new Color(70, 75, 85) : new Color(150, 155, 170));
         UIManager.put("ScrollBar.thumbShadow", dark ? new Color(80, 85, 95) : new Color(160, 165, 180));
@@ -393,6 +616,12 @@ public final class ThemeManager {
         UIManager.put("ScrollBar.trackHighlight", palette.tabBackground);
         UIManager.put("ScrollBar.foreground", dark ? new Color(90, 95, 110) : new Color(170, 175, 190));
         UIManager.put("ScrollBar.background", palette.windowBackground);
+
+        // Button styling
+        UIManager.put("Button.background", palette.accent);
+        UIManager.put("Button.foreground", dark ? Color.WHITE : Color.WHITE);
+        UIManager.put("Button.focus", palette.glow);
+        UIManager.put("Button.select", palette.surface2);
 
         if (dark) {
             UIManager.put("nimbusBase", palette.panelBackground);

@@ -241,33 +241,34 @@ public class InfoPanel {
 
     public static JPanel createModernInfoPanel(String title, String info, ImageIcon icon) {
         JPanel mainPanel = new JPanel(new BorderLayout(0, 0));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_LG, 
+                                                          ThemeManager.SPACING_LG, 
+                                                          ThemeManager.SPACING_LG, 
+                                                          ThemeManager.SPACING_LG));
         mainPanel.setOpaque(false);
 
-        JPanel cardPanel = new JPanel(new BorderLayout(16, 16)) {
+        JPanel cardPanel = new JPanel(new BorderLayout(ThemeManager.SPACING_MD, ThemeManager.SPACING_MD)) {
             @Override
             protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 
                 ThemeManager.Palette palette = ThemeManager.getPalette();
                 
-                // Draw shadow
+                // Simple shadow
                 int shadowOffset = 4;
-                Color shadowColor = palette.isDark() 
-                    ? new Color(0, 0, 0, 60) 
-                    : new Color(0, 0, 0, 15);
+                Color shadowColor = ThemeManager.createShadow(palette.windowBackground, 1);
                 g2d.setColor(shadowColor);
                 g2d.fillRoundRect(shadowOffset, shadowOffset, getWidth() - shadowOffset, 
                                   getHeight() - shadowOffset, 16, 16);
                 
-                // Draw card background
+                // Card background
                 g2d.setColor(palette.panelBackground);
                 g2d.fillRoundRect(0, 0, getWidth() - shadowOffset, 
                                   getHeight() - shadowOffset, 16, 16);
                 
-                // Draw subtle border
+                // Subtle border
                 Color borderColor = palette.isDark()
                     ? new Color(255, 255, 255, 8)
                     : new Color(0, 0, 0, 6);
@@ -278,23 +279,27 @@ public class InfoPanel {
                 g2d.dispose();
             }
         };
-        cardPanel.setBorder(BorderFactory.createEmptyBorder(24, 28, 24, 28));
+        cardPanel.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_XL, 
+                                                            ThemeManager.SPACING_XL, 
+                                                            ThemeManager.SPACING_XL, 
+                                                            ThemeManager.SPACING_XL));
         cardPanel.setOpaque(false);
 
-        JPanel headerPanel = new JPanel(new BorderLayout(12, 0));
+        JPanel headerPanel = new JPanel(new BorderLayout(ThemeManager.SPACING_MD, 0));
         headerPanel.setOpaque(false);
         
-        ImageIcon scaledIcon = scaleIcon(icon, 64);
+        ImageIcon scaledIcon = scaleIcon(icon, 72);
         JLabel iconLabel = new JLabel(scaledIcon);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 16));
+        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, ThemeManager.SPACING_MD));
         
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 20f));
+        titleLabel.setFont(ThemeManager.getFont(ThemeManager.FontScale.HEADING_MEDIUM, 
+                                               ThemeManager.FontWeight.SEMIBOLD));
         titleLabel.setForeground(ThemeManager.getPalette().textPrimary);
         
         headerPanel.add(iconLabel, BorderLayout.WEST);
         headerPanel.add(titleLabel, BorderLayout.CENTER);
-        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, ThemeManager.SPACING_LG, 0));
 
         JTextPane textPane = createModernTextPane(info);
         JScrollPane scrollPane = new JScrollPane(textPane);
@@ -321,19 +326,12 @@ public class InfoPanel {
         textPane.setText(info);
         textPane.setEditable(false);
         
-        String os = System.getProperty("os.name", "").toLowerCase();
-        Font monoFont;
-        if (os.contains("mac")) {
-            monoFont = new Font("SF Mono", Font.PLAIN, 13);
-        } else if (os.contains("win")) {
-            monoFont = new Font("Consolas", Font.PLAIN, 13);
-        } else {
-            monoFont = new Font("Monospace", Font.PLAIN, 13);
-        }
-        
-        textPane.setFont(monoFont);
+        textPane.setFont(ThemeManager.getMonoFont(ThemeManager.FontScale.BODY_SMALL));
         textPane.setBackground(new Color(0, 0, 0, 0));
-        textPane.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        textPane.setBorder(BorderFactory.createEmptyBorder(ThemeManager.SPACING_MD, 
+                                                        ThemeManager.SPACING_MD, 
+                                                        ThemeManager.SPACING_MD, 
+                                                        ThemeManager.SPACING_MD));
         textPane.setFocusable(false);
         textPane.setOpaque(false);
         textPane.setForeground(ThemeManager.getPalette().textPrimary);
