@@ -16,8 +16,12 @@ public class GUI {
         Upload uploadHandler = new Upload();
 
         icon = new ImageIcon(Objects.requireNonNull(GUI.class.getResource("/icon/Icon 128x128.png")));
-
-        jframe = new JFrame("Specs");
+        try {
+            jframe = new JFrame("Specs");
+        } catch (HeadlessException e) {
+            System.out.println("Run me with a GUI idiot");
+            System.exit(1);
+        }
         jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jframe.setSize(900, 520);
         jframe.setMinimumSize(new Dimension(640, 400));
